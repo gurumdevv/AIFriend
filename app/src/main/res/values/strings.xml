@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">AIFriend</string>
+    <string name="chat_start_icon">채팅 시작 아이콘</string>
+    <string name="video_chat_start_icon">비디오 채팅 시작 아이콘</string>
+    <string name="chat">채팅</string>
+    <string name="videocall">영상통화</string>
+    <string name="ic_setting">설정 아이콘</string>
+    <string name="background_image">배경 이미지</string>
+    <string name="character_name">곰돌이</string>
+    <string name="profile_message">🐻😊</string>
+</resources>
