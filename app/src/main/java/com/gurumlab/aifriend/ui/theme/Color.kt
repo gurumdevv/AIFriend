@@ -2,7 +2,7 @@ package com.gurumlab.aifriend.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val primaryLight = Color(0xFF7C580D)
+val primaryLight = Color(0xFFA28263)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFFFFDEAB)
 val onPrimaryContainerLight = Color(0xFF271900)
@@ -89,7 +89,7 @@ val inverseSurfaceLightHighContrast = Color(0xFF352F27)
 val inverseOnSurfaceLightHighContrast = Color(0xFFFFFFFF)
 val inversePrimaryLightHighContrast = Color(0xFFFFE9CA)
 
-val primaryDark = Color(0xFFEFBF6D)
+val primaryDark = Color(0xFFA28263)
 val onPrimaryDark = Color(0xFF422C00)
 val primaryContainerDark = Color(0xFF5F4100)
 val onPrimaryContainerDark = Color(0xFFFFDEAB)
@@ -178,3 +178,8 @@ val inversePrimaryDarkHighContrast = Color(0xFF3A2600)
 
 val black = Color(0xFF000000)
 val white = Color(0xFFFFFFFF)
+val bubble_incoming = Color(0xFFCBBBAC)
+val bubble_outgoing = Color(0xFFBAA38C)
+val gradation_start = Color(0x00F5D7BE)
+val gradation_mid = Color(0xA6CDB49F)
+val gradation_end = Color(0xFF9F8C7B)

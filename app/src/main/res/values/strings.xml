@@ -8,4 +8,6 @@
     <string name="background_image">배경 이미지</string>
     <string name="character_name">곰돌이</string>
     <string name="profile_message">🐻😊</string>
+    <string name="please_text_message">메시지 입력</string>
+    <string name="profile_image">프로필 이미지</string>
 </resources>
