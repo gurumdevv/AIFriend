@@ -37,6 +37,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -55,22 +56,18 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.gurumlab.aifriend.R
+import com.gurumlab.aifriend.data.model.ChatMessage
 import com.gurumlab.aifriend.ui.theme.primaryLight
+import com.gurumlab.aifriend.util.Role
 import kotlinx.coroutines.launch
-
-@Preview(showSystemUi = true, showBackground = true)
-@Composable
-fun ChatScreenPreview() {
-    ChatScreen(onNavUp = {})
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     onNavUp: () -> Unit,
+    viewModel: ChatViewModel
 ) {
     val scrollState = rememberLazyListState()
     val topBarState = rememberTopAppBarState()
@@ -94,6 +91,7 @@ fun ChatScreen(
                 .fillMaxSize()
                 .padding(innerPadding),
             scrollState = scrollState,
+            viewModel = viewModel
         )
     }
 }
@@ -101,7 +99,8 @@ fun ChatScreen(
 @Composable
 fun ChatContent(
     modifier: Modifier = Modifier,
-    scrollState: LazyListState = rememberLazyListState()
+    scrollState: LazyListState = rememberLazyListState(),
+    viewModel: ChatViewModel
 ) {
 
     val chatMessages = remember { listOf<ChatMessage>().toMutableStateList() }
@@ -134,7 +133,8 @@ fun ChatContent(
                     .padding(horizontal = 7.dp)
                     .navigationBarsPadding(),
                 onMessageSent = { content ->
-                    chatMessages.add(ChatMessage(text = content, isUser = true))
+                    chatMessages.add(ChatMessage(role = Role.USER, content = content))
+                    viewModel.getResponse(content)
                 },
                 resetScroll = {
                     scope.launch {
@@ -163,6 +163,13 @@ fun ChatContent(
                 })
         )
     }
+
+    LaunchedEffect(Unit) {
+        viewModel.response.collect { response ->
+            chatMessages.add(ChatMessage(role = Role.ASSISTANT, content = response))
+            scrollState.animateScrollToItem(chatMessages.size - 1)
+        }
+    }
 }
 
 @Composable
@@ -181,12 +188,11 @@ fun Messages(
         ) {
             items(
                 items = messages,
-                key = { it.text }
             ) { message ->
-                if (message.isUser) {
-                    UserMessage(message = message.text)
+                if (message.role == Role.USER) {
+                    UserMessage(message = message.content)
                 } else {
-                    BotMessage(message = message.text)
+                    BotMessage(message = message.content)
                 }
                 Spacer(modifier = Modifier.height(14.dp))
             }
@@ -284,8 +290,3 @@ fun ChatAppBar(
         }
     )
 }
-
-data class ChatMessage(
-    val text: String,
-    val isUser: Boolean
-)

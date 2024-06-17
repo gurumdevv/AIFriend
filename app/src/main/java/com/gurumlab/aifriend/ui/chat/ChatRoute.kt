@@ -1,10 +1,12 @@
 package com.gurumlab.aifriend.ui.chat
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun ChatRoute(
     onNavUp: () -> Unit,
 ) {
-    ChatScreen(onNavUp = onNavUp)
+    val viewModel = hiltViewModel<ChatViewModel>()
+    ChatScreen(onNavUp = onNavUp, viewModel = viewModel)
 }
