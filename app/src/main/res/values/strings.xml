@@ -10,4 +10,7 @@
     <string name="profile_message">🐻😊</string>
     <string name="please_text_message">메시지 입력</string>
     <string name="profile_image">프로필 이미지</string>
+    <string name="btn_send">전송 버튼</string>
+    <string name="btn_back">뒤로가기 버튼</string>
+    <string name="jump_to_bottom_label">JumpToBottom offset animation</string>
 </resources>
