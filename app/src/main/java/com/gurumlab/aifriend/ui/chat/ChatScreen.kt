@@ -52,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -106,6 +107,7 @@ fun ChatContent(
     val chatMessages = remember { listOf<ChatMessage>().toMutableStateList() }
     var inputFieldHeight by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val jumpToBottomButtonEnabled by remember {
         derivedStateOf {
@@ -135,6 +137,12 @@ fun ChatContent(
                 onMessageSent = { content ->
                     chatMessages.add(ChatMessage(role = Role.USER, content = content))
                     viewModel.getResponse(content)
+                    chatMessages.add(
+                        ChatMessage(
+                            role = Role.ASSISTANT,
+                            content = context.getString(R.string.loading)
+                        )
+                    )
                 },
                 resetScroll = {
                     scope.launch {
@@ -166,7 +174,9 @@ fun ChatContent(
 
     LaunchedEffect(Unit) {
         viewModel.response.collect { response ->
-            chatMessages.add(ChatMessage(role = Role.ASSISTANT, content = response))
+            chatMessages.removeLast()
+            val responseMessage = response.ifBlank { context.getString(R.string.fail_response) }
+            chatMessages.add(ChatMessage(role = Role.ASSISTANT, content = responseMessage))
             scrollState.animateScrollToItem(chatMessages.size - 1)
         }
     }

@@ -13,4 +13,6 @@
     <string name="btn_send">전송 버튼</string>
     <string name="btn_back">뒤로가기 버튼</string>
     <string name="jump_to_bottom_label">JumpToBottom offset animation</string>
+    <string name="fail_response">답변 생성에 실패했습니다.\n네트워크 연결 상태를 확인해 주세요.</string>
+    <string name="loading">…</string>
 </resources>
