@@ -1,4 +1,4 @@
-package com.gurumlab.aifriend.utils
+package com.gurumlab.aifriend.ui.utils
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.runtime.Composable

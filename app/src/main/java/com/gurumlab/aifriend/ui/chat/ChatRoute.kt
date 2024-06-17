@@ -1,4 +1,4 @@
-package com.gurumlab.aifriend.chat
+package com.gurumlab.aifriend.ui.chat
 
 import androidx.compose.runtime.Composable
 

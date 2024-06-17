@@ -1,4 +1,4 @@
-package com.gurumlab.aifriend.home
+package com.gurumlab.aifriend.ui.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -27,8 +27,8 @@ import com.gurumlab.aifriend.R
 import com.gurumlab.aifriend.ui.theme.gradation_end
 import com.gurumlab.aifriend.ui.theme.gradation_mid
 import com.gurumlab.aifriend.ui.theme.gradation_start
-import com.gurumlab.aifriend.utils.CustomComposable.CustomImage
-import com.gurumlab.aifriend.utils.CustomComposable.CustomText
+import com.gurumlab.aifriend.ui.utils.CustomComposable.CustomImage
+import com.gurumlab.aifriend.ui.utils.CustomComposable.CustomText
 
 @Composable
 fun BottomComposable(

@@ -1,6 +1,16 @@
+import java.io.FileInputStream
+import java.util.Properties
+
+val localPropertiesFile = rootProject.file("local.properties")
+val localProperties = Properties().apply { load(FileInputStream(localPropertiesFile)) }
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("kotlin-parcelize")
+    id("com.google.devtools.ksp")
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -13,10 +23,17 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        android.buildFeatures.buildConfig = true
+
+        buildConfigField("String", "GPT_API_KEY", localProperties["gpt_api_key"] as String)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
+        }
+
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
         }
     }
 
@@ -51,6 +68,18 @@ android {
 
 dependencies {
 
+    implementation(libs.logging.interceptor)
+    implementation(libs.okhttp)
+    implementation(libs.retrofit)
+    implementation(libs.converter.moshi)
+    kapt(libs.hilt.compiler)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.hilt.android)
+    implementation(libs.gson)
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
     implementation(libs.accompanist.drawablepainter)
     implementation(libs.coil.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

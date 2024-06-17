@@ -1,4 +1,4 @@
-package com.gurumlab.aifriend.home
+package com.gurumlab.aifriend.ui.home
 
 import androidx.compose.runtime.Composable
 

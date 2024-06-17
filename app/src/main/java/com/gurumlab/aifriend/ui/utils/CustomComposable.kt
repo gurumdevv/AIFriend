@@ -1,4 +1,4 @@
-package com.gurumlab.aifriend.utils
+package com.gurumlab.aifriend.ui.utils
 
 import androidx.compose.foundation.Image
 import androidx.compose.material3.Text

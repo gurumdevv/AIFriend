@@ -1,4 +1,4 @@
-package com.gurumlab.aifriend.home
+package com.gurumlab.aifriend.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.gurumlab.aifriend.utils.CustomComposable.CustomImage
+import com.gurumlab.aifriend.ui.utils.CustomComposable.CustomImage
 import com.gurumlab.aifriend.R
 
 @Composable

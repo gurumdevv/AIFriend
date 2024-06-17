@@ -1,4 +1,4 @@
-package com.gurumlab.aifriend.chat
+package com.gurumlab.aifriend.ui.chat
 
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
@@ -38,12 +38,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.gurumlab.aifriend.R
-import com.gurumlab.aifriend.chat.BubbleValues.BUBBLE_MAX_RATIO
-import com.gurumlab.aifriend.utils.CustomComposable.CustomImage
-import com.gurumlab.aifriend.utils.CustomComposable.CustomText
-import com.gurumlab.aifriend.utils.CustomShape
-import com.gurumlab.aifriend.utils.CustomShape.CustomRectangle
-import com.gurumlab.aifriend.utils.CustomShape.CustomTriangle
+import com.gurumlab.aifriend.ui.chat.BubbleValues.BUBBLE_MAX_RATIO
+import com.gurumlab.aifriend.ui.utils.CustomComposable.CustomImage
+import com.gurumlab.aifriend.ui.utils.CustomComposable.CustomText
+import com.gurumlab.aifriend.ui.utils.CustomShape
+import com.gurumlab.aifriend.ui.utils.CustomShape.CustomRectangle
+import com.gurumlab.aifriend.ui.utils.CustomShape.CustomTriangle
 import com.gurumlab.aifriend.ui.theme.bubble_incoming
 import com.gurumlab.aifriend.ui.theme.bubble_outgoing
 import com.gurumlab.aifriend.ui.theme.edit_text_background

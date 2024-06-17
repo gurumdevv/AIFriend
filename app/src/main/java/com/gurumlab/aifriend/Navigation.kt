@@ -9,10 +9,10 @@ import com.gurumlab.aifriend.Destinations.CHAT_ROUTE
 import com.gurumlab.aifriend.Destinations.HOME_ROUTE
 import com.gurumlab.aifriend.Destinations.SETTINGS_ROUTE
 import com.gurumlab.aifriend.Destinations.VIDEO_CALL_ROUTE
-import com.gurumlab.aifriend.chat.ChatRoute
-import com.gurumlab.aifriend.home.HomeRoute
-import com.gurumlab.aifriend.settings.SettingsRoute
-import com.gurumlab.aifriend.videocall.VideoChatRoute
+import com.gurumlab.aifriend.ui.chat.ChatRoute
+import com.gurumlab.aifriend.ui.home.HomeRoute
+import com.gurumlab.aifriend.ui.settings.SettingsRoute
+import com.gurumlab.aifriend.ui.videocall.VideoChatRoute
 
 object Destinations {
     const val HOME_ROUTE = "home"
