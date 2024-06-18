@@ -38,6 +38,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -46,13 +47,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -104,10 +103,9 @@ fun ChatContent(
     viewModel: ChatViewModel
 ) {
 
-    val chatMessages = remember { listOf<ChatMessage>().toMutableStateList() }
+    val chatMessages by viewModel.chatMessages.collectAsState()
     var inputFieldHeight by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     val jumpToBottomButtonEnabled by remember {
         derivedStateOf {
@@ -135,14 +133,9 @@ fun ChatContent(
                     .padding(horizontal = 7.dp)
                     .navigationBarsPadding(),
                 onMessageSent = { content ->
-                    chatMessages.add(ChatMessage(role = Role.USER, content = content))
-                    viewModel.getResponse(content)
-                    chatMessages.add(
-                        ChatMessage(
-                            role = Role.ASSISTANT,
-                            content = context.getString(R.string.loading)
-                        )
-                    )
+                    viewModel.addMessage(role = Role.USER, content = content)
+                    viewModel.insertLoadingMessage()
+                    viewModel.getResponse()
                 },
                 resetScroll = {
                     scope.launch {
@@ -172,11 +165,8 @@ fun ChatContent(
         )
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.response.collect { response ->
-            chatMessages.removeLast()
-            val responseMessage = response.ifBlank { context.getString(R.string.fail_response) }
-            chatMessages.add(ChatMessage(role = Role.ASSISTANT, content = responseMessage))
+    LaunchedEffect(chatMessages) {
+        if (chatMessages.isNotEmpty()) {
             scrollState.animateScrollToItem(chatMessages.size - 1)
         }
     }
