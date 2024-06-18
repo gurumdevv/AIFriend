@@ -13,7 +13,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onCompletion
 import javax.inject.Inject
 
 class ChatRepository @Inject constructor(
@@ -23,7 +22,6 @@ class ChatRepository @Inject constructor(
 
     fun getResponse(
         messages: List<ChatMessage>,
-        onCompletion: () -> Unit,
         onError: (message: String?) -> Unit,
         onException: (message: String?) -> Unit
     ): Flow<ChatResponse> = flow {
@@ -37,8 +35,7 @@ class ChatRepository @Inject constructor(
         }.onException {
             onException(it.message)
         }
-    }.onCompletion { onCompletion() }
-        .flowOn(Dispatchers.IO)
+    }.flowOn(Dispatchers.IO)
 
     fun getLastThreeMessages(): Flow<List<ChatMessage>> = flow {
         emit(chatDao.getLastFiveMessages())

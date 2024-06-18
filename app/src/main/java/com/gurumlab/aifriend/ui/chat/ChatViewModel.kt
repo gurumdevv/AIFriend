@@ -29,9 +29,6 @@ class ChatViewModel @Inject constructor(
             val lastMessage = getLastMessage()
             val response = repository.getResponse(
                 messages = lastMessage,
-                onCompletion = {
-                    deleteLoadingMessage()
-                },
                 onError = {
                     Log.d("Chat", "onError: $it")
                 },
@@ -42,6 +39,7 @@ class ChatViewModel @Inject constructor(
 
             val responseMessage = response?.choices?.firstOrNull()?.message?.content
             addMessage(Role.ASSISTANT, responseMessage)
+            deleteLoadingMessage()
         }
     }
 
