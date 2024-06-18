@@ -38,19 +38,23 @@ class ChatViewModel @Inject constructor(
             ).firstOrNull()
 
             val responseMessage = response?.choices?.firstOrNull()?.message?.content
-            addMessage(Role.ASSISTANT, responseMessage)
-            deleteLoadingMessage()
+            addMessage(Role.ASSISTANT, responseMessage, true)
         }
     }
 
-    fun addMessage(role: String, content: String?) {
+    fun addMessage(role: String, content: String?, isAssistant: Boolean = false) {
         val newMessage = ChatMessage(
             role = role,
             content = content ?: application.getString(R.string.fail_response)
         )
 
         viewModelScope.launch {
-            _chatMessages.value += newMessage
+            _chatMessages.value = _chatMessages.value.toMutableList().apply {
+                if (isAssistant) {
+                    removeLast()
+                }
+                add(newMessage)
+            }
             content?.let {
                 repository.insertMessage(newMessage)
             }
@@ -64,17 +68,11 @@ class ChatViewModel @Inject constructor(
     fun insertLoadingMessage() {
         val loadingMessage = ChatMessage(
             role = Role.ASSISTANT,
-            content = application.getString(R.string.loading),
+            content = application.getString(R.string.loading)
         )
 
         viewModelScope.launch {
             _chatMessages.value += loadingMessage
-        }
-    }
-
-    private fun deleteLoadingMessage() {
-        viewModelScope.launch {
-            _chatMessages.value -= _chatMessages.value[_chatMessages.value.size - 2]
         }
     }
 }
