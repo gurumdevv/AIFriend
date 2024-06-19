@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -37,8 +36,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -49,14 +46,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.gurumlab.aifriend.R
 import com.gurumlab.aifriend.data.model.ChatMessage
 import com.gurumlab.aifriend.ui.theme.primaryLight
@@ -103,19 +104,26 @@ fun ChatContent(
     viewModel: ChatViewModel
 ) {
 
-    val chatMessages by viewModel.chatMessages.collectAsState()
+    val chatMessages = viewModel.chatMessages.collectAsLazyPagingItems()
     var inputFieldHeight by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val jumpToBottomButtonEnabled by remember {
         derivedStateOf {
             val visibleItems = scrollState.layoutInfo.visibleItemsInfo
             if (visibleItems.isNotEmpty()) {
                 val lastVisibleItem = visibleItems.last()
-                lastVisibleItem.index < chatMessages.size - 1
+                lastVisibleItem.index < chatMessages.itemCount - 1
             } else {
                 false
             }
+        }
+    }
+
+    val goToBottom: suspend () -> Unit = {
+        if (chatMessages.itemCount > 0) {
+            scrollState.scrollToItem(chatMessages.itemCount - 1)
         }
     }
 
@@ -132,17 +140,16 @@ fun ChatContent(
                 modifier = Modifier
                     .padding(horizontal = 7.dp)
                     .navigationBarsPadding(),
-                onMessageSent = { content ->
-                    viewModel.addMessage(role = Role.USER, content = content)
-                    viewModel.insertLoadingMessage()
-                    viewModel.getResponse()
-                },
-                resetScroll = {
+                onFocus = {
                     scope.launch {
-                        if (chatMessages.isNotEmpty()) {
-                            scrollState.scrollToItem(chatMessages.size - 1)
-                        }
+                        goToBottom()
                     }
+                },
+                onMessageSent = { content ->
+                    viewModel.getResponse(
+                        content = content,
+                        loadingMessage = context.getString(R.string.loading)
+                    )
                 },
                 onSizeChanged = { height ->
                     inputFieldHeight = height
@@ -154,7 +161,7 @@ fun ChatContent(
             enabled = jumpToBottomButtonEnabled,
             onClicked = {
                 scope.launch {
-                    scrollState.animateScrollToItem(chatMessages.size - 1)
+                    goToBottom()
                 }
             },
             modifier = Modifier
@@ -164,35 +171,32 @@ fun ChatContent(
                 })
         )
     }
-
-    LaunchedEffect(chatMessages) {
-        if (chatMessages.isNotEmpty()) {
-            scrollState.animateScrollToItem(chatMessages.size - 1)
-        }
-    }
 }
 
 @Composable
 fun Messages(
     modifier: Modifier = Modifier,
-    messages: List<ChatMessage>,
+    messages: LazyPagingItems<ChatMessage>,
     scrollState: LazyListState
 ) {
     Box(
         modifier = modifier
     ) {
+        val context = LocalContext.current
+
         LazyColumn(
             state = scrollState,
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            items(
-                items = messages,
-            ) { message ->
-                if (message.role == Role.USER) {
-                    UserMessage(message = message.content)
-                } else {
-                    BotMessage(message = message.content)
+            items(messages.itemCount) { index ->
+                messages[messages.itemCount - 1 - index]?.let { message ->
+
+                    if (message.role == Role.USER) {
+                        UserMessage(message = message.content)
+                    } else {
+                        BotMessage(message = message.content.ifEmpty { context.getString(R.string.fail_response) })
+                    }
                 }
                 Spacer(modifier = Modifier.height(14.dp))
             }
@@ -203,8 +207,8 @@ fun Messages(
 @Composable
 fun ChatInput(
     modifier: Modifier = Modifier,
+    onFocus: () -> Unit,
     onMessageSent: (String) -> Unit,
-    resetScroll: () -> Unit = {},
     onSizeChanged: (Int) -> Unit
 ) {
     var textState by rememberSaveable { mutableStateOf("") }
@@ -221,7 +225,6 @@ fun ChatInput(
         if (textState.isNotBlank()) {
             onMessageSent(textState)
             textState = ""
-            resetScroll()
         }
     }
 
@@ -238,7 +241,8 @@ fun ChatInput(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 7.dp),
+                .padding(horizontal = 7.dp)
+                .onFocusEvent { onFocus() },
             verticalAlignment = Alignment.CenterVertically
         ) {
             TextField(

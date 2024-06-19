@@ -1,5 +1,8 @@
 package com.gurumlab.aifriend.data.repository
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.gurumlab.aifriend.data.model.ChatMessage
 import com.gurumlab.aifriend.data.model.ChatRequest
 import com.gurumlab.aifriend.data.model.ChatResponse
@@ -43,5 +46,17 @@ class ChatRepository @Inject constructor(
 
     suspend fun insertMessage(message: ChatMessage) {
         chatDao.insertMessage(message)
+    }
+
+    fun getAllMessages(): Flow<PagingData<ChatMessage>> {
+        return Pager(
+            config = PagingConfig(pageSize = 20, enablePlaceholders = false, initialLoadSize = 30),
+            pagingSourceFactory = { chatDao.getAllMessages() }
+        ).flow
+    }
+
+    suspend fun deleteLoadingMessage() {
+        val loadingMessage = chatDao.getLastMessage()
+        chatDao.deleteById(loadingMessage.id)
     }
 }
