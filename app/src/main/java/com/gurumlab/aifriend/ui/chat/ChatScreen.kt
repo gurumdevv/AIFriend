@@ -36,6 +36,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -124,6 +125,12 @@ fun ChatContent(
     val goToBottom: suspend () -> Unit = {
         if (chatMessages.itemCount > 0) {
             scrollState.scrollToItem(chatMessages.itemCount - 1)
+        }
+    }
+
+    LaunchedEffect(chatMessages.itemCount) {
+        if (chatMessages.itemCount > 0) {
+            goToBottom()
         }
     }
 
