@@ -1,0 +1,18 @@
+package com.gurumlab.aifriend.data.source.remote
+
+import com.gurumlab.aifriend.data.model.TranscriptionResponse
+import okhttp3.MultipartBody
+import retrofit2.http.Multipart
+import retrofit2.http.POST
+import retrofit2.http.Part
+
+interface TranscriptionApiClient {
+
+    @POST("v1/audio/transcriptions")
+    @Multipart
+    suspend fun getResponse(
+        @Part file: MultipartBody.Part,
+        @Part model: MultipartBody.Part,
+        @Part language: MultipartBody.Part
+    ): ApiResponse<TranscriptionResponse>
+}

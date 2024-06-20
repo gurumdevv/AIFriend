@@ -15,4 +15,10 @@
     <string name="jump_to_bottom_label">JumpToBottom offset animation</string>
     <string name="fail_response">답변 생성에 실패했습니다.\n네트워크 연결 상태를 확인해 주세요.</string>
     <string name="loading">…</string>
+    <string name="microphone">마이크</string>
+    <string name="character">캐릭터</string>
+    <string name="btn_record_permission">녹음 권한 요청</string>
+    <string name="request_record_permission_again">녹음 권한은 필수 입니다.\n녹음 권한을 허용해주세요.</string>
+    <string name="request_record_permission">녹음 권한이 필요합니다.</string>
+    <string name="waiting_response">응답 대기중</string>
 </resources>

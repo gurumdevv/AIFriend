@@ -2,7 +2,7 @@ package com.gurumlab.aifriend.di
 
 import com.gurumlab.aifriend.BuildConfig
 import com.gurumlab.aifriend.data.source.remote.ApiCallAdapterFactory
-import com.gurumlab.aifriend.data.source.remote.ApiClient
+import com.gurumlab.aifriend.data.source.remote.ChatApiClient
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -15,11 +15,12 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.util.concurrent.TimeUnit
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object NetworkModule {
+object ChatRequestModule {
 
     @Singleton
     @Provides
@@ -30,6 +31,7 @@ object NetworkModule {
     }
 
     @Singleton
+    @ChatOkhttpClient
     @Provides
     fun provideOkHttpClient(): OkHttpClient {
         val logger = HttpLoggingInterceptor().apply {
@@ -38,7 +40,7 @@ object NetworkModule {
 
         val header = Interceptor { chain ->
             val newRequest = chain.request().newBuilder()
-                .addHeader("Content-Type", "aaplication/json")
+                .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization", "Bearer ${BuildConfig.GPT_API_KEY}")
                 .build()
             chain.proceed(newRequest)
@@ -54,8 +56,9 @@ object NetworkModule {
     }
 
     @Singleton
+    @ChatRetrofit
     @Provides
-    fun provideRetrofit(client: OkHttpClient, moshi: Moshi): Retrofit {
+    fun provideRetrofit(@ChatOkhttpClient client: OkHttpClient, moshi: Moshi): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://api.openai.com/")
             .client(client)
@@ -66,11 +69,15 @@ object NetworkModule {
 
     @Singleton
     @Provides
-    fun provideApiService(retrofit: Retrofit): ApiClient {
-        return retrofit.create(ApiClient::class.java)
+    fun provideApiService(@ChatRetrofit retrofit: Retrofit): ChatApiClient {
+        return retrofit.create(ChatApiClient::class.java)
     }
 }
 
-object GPTVersion {
-    const val CURRENT_VERSION = "gpt-4o"
-}
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class ChatOkhttpClient
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class ChatRetrofit

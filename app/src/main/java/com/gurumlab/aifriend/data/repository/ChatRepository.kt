@@ -7,11 +7,11 @@ import com.gurumlab.aifriend.data.model.ChatMessage
 import com.gurumlab.aifriend.data.model.ChatRequest
 import com.gurumlab.aifriend.data.model.ChatResponse
 import com.gurumlab.aifriend.data.source.local.ChatDao
-import com.gurumlab.aifriend.data.source.remote.ApiClient
+import com.gurumlab.aifriend.data.source.remote.ChatApiClient
 import com.gurumlab.aifriend.data.source.remote.onError
 import com.gurumlab.aifriend.data.source.remote.onException
 import com.gurumlab.aifriend.data.source.remote.onSuccess
-import com.gurumlab.aifriend.di.GPTVersion
+import com.gurumlab.aifriend.util.GPTConstants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
 class ChatRepository @Inject constructor(
-    private val apiClient: ApiClient,
+    private val apiClient: ChatApiClient,
     private val chatDao: ChatDao
 ) {
 
@@ -29,7 +29,7 @@ class ChatRepository @Inject constructor(
         onException: (message: String?) -> Unit
     ): Flow<ChatResponse> = flow {
         val response = apiClient.getResponse(
-            ChatRequest(GPTVersion.CURRENT_VERSION, messages)
+            ChatRequest(GPTConstants.CURRENT_VERSION, messages)
         )
         response.onSuccess {
             emit(it)

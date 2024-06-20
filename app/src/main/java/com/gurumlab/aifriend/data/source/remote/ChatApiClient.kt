@@ -5,7 +5,7 @@ import com.gurumlab.aifriend.data.model.ChatResponse
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-interface ApiClient {
+interface ChatApiClient {
 
     @POST("v1/chat/completions")
     suspend fun getResponse(@Body requestBody: ChatRequest): ApiResponse<ChatResponse>
