@@ -40,7 +40,7 @@ class ChatRepository @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-    fun getLastThreeMessages(): Flow<List<ChatMessage>> = flow {
+    fun getLastFiveMessages(): Flow<List<ChatMessage>> = flow {
         emit(chatDao.getLastFiveMessages())
     }.flowOn(Dispatchers.IO)
 
