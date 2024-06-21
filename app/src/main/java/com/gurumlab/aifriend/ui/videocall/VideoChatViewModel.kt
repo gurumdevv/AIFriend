@@ -70,7 +70,6 @@ class VideoChatViewModel @Inject constructor(
         addMessage(content = transcription, role = Role.USER)
         val chatResponse = repository.getChatResponse(
             messages = (newMessage + lastMessage).reversed(),
-            onCompletion = { setLoadingState(false) },
             onError = { handleError("onError: $it") },
             onException = { handleError("onException: $it") }
         ).firstOrNull()
@@ -89,7 +88,6 @@ class VideoChatViewModel @Inject constructor(
 
         val emotionResponse = repository.getChatResponse(
             messages = listOf(emotionCommand, message),
-            onCompletion = {},
             onError = { handleError("onError: $it") },
             onException = { handleError("onException: $it") }
         ).firstOrNull()
@@ -118,6 +116,7 @@ class VideoChatViewModel @Inject constructor(
         mediaHandler.playMediaPlayer(
             inputStream = speechResponse,
             onStart = {
+                setLoadingState(false)
                 _characterEmotion.value = emotion.drawableRes
             },
             onCompletion = {
