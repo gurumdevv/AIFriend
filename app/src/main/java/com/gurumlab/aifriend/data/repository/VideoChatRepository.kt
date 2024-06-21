@@ -13,11 +13,11 @@ import com.gurumlab.aifriend.data.source.remote.onError
 import com.gurumlab.aifriend.data.source.remote.onException
 import com.gurumlab.aifriend.data.source.remote.onSuccess
 import com.gurumlab.aifriend.util.GPTConstants
+import com.gurumlab.aifriend.util.Role
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onCompletion
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
@@ -55,8 +55,10 @@ class VideoChatRepository @Inject constructor(
         onError: (message: String?) -> Unit,
         onException: (message: String?) -> Unit
     ): Flow<ChatResponse> = flow {
+        val chatCommand =
+            listOf(ChatMessage(role = Role.SYSTEM, content = GPTConstants.CHARACTER_SETTING))
         val response = chatApiClient.getResponse(
-            ChatRequest(GPTConstants.CURRENT_VERSION, messages)
+            ChatRequest(GPTConstants.CURRENT_VERSION, chatCommand + messages)
         )
         response.onSuccess {
             emit(it)

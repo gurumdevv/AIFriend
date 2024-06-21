@@ -12,6 +12,7 @@ import com.gurumlab.aifriend.data.source.remote.onError
 import com.gurumlab.aifriend.data.source.remote.onException
 import com.gurumlab.aifriend.data.source.remote.onSuccess
 import com.gurumlab.aifriend.util.GPTConstants
+import com.gurumlab.aifriend.util.Role
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -28,8 +29,10 @@ class ChatRepository @Inject constructor(
         onError: (message: String?) -> Unit,
         onException: (message: String?) -> Unit
     ): Flow<ChatResponse> = flow {
+        val chatCommand =
+            listOf(ChatMessage(role = Role.SYSTEM, content = GPTConstants.CHARACTER_SETTING))
         val response = apiClient.getResponse(
-            ChatRequest(GPTConstants.CURRENT_VERSION, messages)
+            ChatRequest(GPTConstants.CURRENT_VERSION, chatCommand + messages)
         )
         response.onSuccess {
             emit(it)
