@@ -37,6 +37,8 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -109,6 +111,7 @@ fun ChatContent(
     var inputFieldHeight by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val isLoading = viewModel.isLoading.collectAsState(false)
 
     val jumpToBottomButtonEnabled by remember {
         derivedStateOf {
@@ -160,7 +163,8 @@ fun ChatContent(
                 },
                 onSizeChanged = { height ->
                     inputFieldHeight = height
-                }
+                },
+                isLoading = isLoading
             )
         }
 
@@ -216,7 +220,8 @@ fun ChatInput(
     modifier: Modifier = Modifier,
     onFocus: () -> Unit,
     onMessageSent: (String) -> Unit,
-    onSizeChanged: (Int) -> Unit
+    onSizeChanged: (Int) -> Unit,
+    isLoading: State<Boolean>
 ) {
     var textState by rememberSaveable { mutableStateOf("") }
 
@@ -264,7 +269,10 @@ fun ChatInput(
                 placeholder = { Text(stringResource(R.string.please_text_message)) }
             )
 
-            IconButton(onClick = onClick) {
+            IconButton(
+                onClick = onClick,
+                enabled = !isLoading.value
+            ) {
                 Icon(
                     modifier = Modifier,
                     painter = painterResource(id = R.drawable.ic_send),

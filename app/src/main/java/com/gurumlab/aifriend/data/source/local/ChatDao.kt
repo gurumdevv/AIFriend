@@ -15,8 +15,8 @@ interface ChatDao {
     @Query("SELECT * FROM ChatMessage ORDER BY id DESC")
     fun getAllMessages(): PagingSource<Int, ChatMessage>
 
-    @Query("SELECT * FROM ChatMessage ORDER BY id DESC LIMIT 3")
-    suspend fun getThreeMessages(): List<ChatMessage>
+    @Query("SELECT * FROM ChatMessage ORDER BY id DESC LIMIT 4")
+    suspend fun getFourMessages(): List<ChatMessage>
 
     @Query("DELETE FROM ChatMessage WHERE id = :id")
     suspend fun deleteById(id: Int)

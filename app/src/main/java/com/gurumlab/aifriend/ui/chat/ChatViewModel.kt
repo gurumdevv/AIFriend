@@ -10,6 +10,8 @@ import com.gurumlab.aifriend.data.repository.ChatRepository
 import com.gurumlab.aifriend.util.Role
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -22,8 +24,12 @@ class ChatViewModel @Inject constructor(
     val chatMessages: Flow<PagingData<ChatMessage>> =
         repository.getAllMessages().cachedIn(viewModelScope)
 
+    private val _isLoading = MutableSharedFlow<Boolean>()
+    val isLoading = _isLoading.asSharedFlow()
+
     fun getResponse(content: String, loadingMessage: String) {
         viewModelScope.launch {
+            _isLoading.emit(true)
             val newMessage = listOf(ChatMessage(role = Role.USER, content = content))
             val lastMessage = getLastMessage()
             addMessage(Role.USER, content)
@@ -40,6 +46,7 @@ class ChatViewModel @Inject constructor(
             val responseMessage = response?.choices?.firstOrNull()?.message?.content ?: ""
             repository.deleteLoadingMessage()
             addMessage(Role.ASSISTANT, responseMessage)
+            _isLoading.emit(false)
         }
     }
 
@@ -53,6 +60,6 @@ class ChatViewModel @Inject constructor(
     }
 
     private suspend fun getLastMessage(): List<ChatMessage> {
-        return repository.getLastThreeMessages().firstOrNull() ?: emptyList()
+        return repository.getLastFourMessages().firstOrNull() ?: emptyList()
     }
 }

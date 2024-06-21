@@ -139,7 +139,7 @@ class VideoChatViewModel @Inject constructor(
     }
 
     private suspend fun getLastMessage(): List<ChatMessage> {
-        return repository.getLastThreeMessages().firstOrNull() ?: emptyList()
+        return repository.getLastFourMessages().firstOrNull() ?: emptyList()
     }
 
     private fun setLoadingState(state: Boolean) {

@@ -90,8 +90,8 @@ class VideoChatRepository @Inject constructor(
         }
     }.flowOn(Dispatchers.IO)
 
-    fun getLastThreeMessages(): Flow<List<ChatMessage>> = flow {
-        emit(chatDao.getThreeMessages())
+    fun getLastFourMessages(): Flow<List<ChatMessage>> = flow {
+        emit(chatDao.getFourMessages())
     }.flowOn(Dispatchers.IO)
 
     suspend fun insertMessage(message: ChatMessage) {
