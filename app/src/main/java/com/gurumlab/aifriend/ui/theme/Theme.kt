@@ -218,10 +218,8 @@ fun AIFriendTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        darkTheme -> darkScheme
-        else -> lightScheme
-    }
+    val colorScheme = lightScheme
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {

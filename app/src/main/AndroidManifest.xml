@@ -19,6 +19,7 @@
         tools:targetApi="tiramisu">
         <activity
             android:name=".MainActivity"
+            android:screenOrientation="portrait"
             android:exported="true"
             android:theme="@style/Theme.AIFriend"
             android:windowSoftInputMode="adjustResize">
