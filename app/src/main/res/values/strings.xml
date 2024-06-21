@@ -22,4 +22,10 @@
     <string name="request_record_permission">녹음 권한이 필요합니다.</string>
     <string name="waiting_response">응답 대기중</string>
     <string name="fail_recording">음성 녹음에 실패했습니다.</string>
+    <string name="not_set_yet">설정되지 않음</string>
+    <string name="confirm">확인</string>
+    <string name="cancel">취소</string>
+    <string name="set_api_key">API Key 설정</string>
+    <string name="insert_api_key">API Key 입력</string>
+    <string name="api_key">API Key</string>
 </resources>

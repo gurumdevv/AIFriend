@@ -10,7 +10,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import com.gurumlab.aifriend.R
 
 object CustomComposable {
@@ -36,15 +38,20 @@ object CustomComposable {
         value: String,
         fontStyle: TextStyle,
         color: Color,
-        textAlign: TextAlign
+        textAlign: TextAlign,
+        fontWeight: FontWeight? = null,
+        maxLines: Int = Int.MAX_VALUE
     ) {
         Text(
+            modifier = modifier,
             text = value,
             textAlign = textAlign,
             color = color,
             style = fontStyle,
             fontFamily = FontFamily(Font(R.font.dongdong)),
-            modifier = modifier
+            fontWeight = fontWeight,
+            maxLines = maxLines,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
