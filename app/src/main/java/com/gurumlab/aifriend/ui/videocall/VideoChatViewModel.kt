@@ -4,12 +4,15 @@ import android.media.MediaPlayer
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gurumlab.aifriend.R
 import com.gurumlab.aifriend.data.model.ChatMessage
 import com.gurumlab.aifriend.data.repository.VideoChatRepository
 import com.gurumlab.aifriend.util.Role
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.io.File
@@ -22,18 +25,24 @@ class VideoChatViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var mediaPlayer: MediaPlayer? = null
+
     private val _isLoading = MutableSharedFlow<Boolean>()
     val isLoading = _isLoading.asSharedFlow()
 
+    private val _characterEmotion = MutableStateFlow(R.drawable.character_normal)
+    val characterEmotion = _characterEmotion.asStateFlow()
+
     fun getResponse(file: File) {
         viewModelScope.launch {
-            _isLoading.emit(true)
+            setLoadingState(true)
             val transcriptionResponse = repository.getTranscription(
                 file = file,
                 onError = {
+                    setLoadingState(false)
                     Log.d("VideoChat", "onError: $it")
                 },
                 onException = {
+                    setLoadingState(false)
                     Log.d("VideoChat", "onException: $it")
                 }
             ).firstOrNull()
@@ -41,6 +50,7 @@ class VideoChatViewModel @Inject constructor(
 
             if (transcriptionText.isEmpty()) {
                 Log.d("VideoChat", "transcriptionText is empty")
+                setLoadingState(false)
                 return@launch
             }
 
@@ -51,11 +61,16 @@ class VideoChatViewModel @Inject constructor(
 
             val chatResponse = repository.getChatResponse(
                 messages = listOf(newMessage),
+                onCompletion = {
+                    setLoadingState(false)
+                },
                 onError = {
                     Log.d("VideoChat", "onError: $it")
+                    setLoadingState(false)
                 },
                 onException = {
                     Log.d("VideoChat", "onException: $it")
+                    setLoadingState(false)
                 }
             ).firstOrNull()
 
@@ -63,16 +78,36 @@ class VideoChatViewModel @Inject constructor(
 
             if (chatText.isEmpty()) {
                 Log.d("VideoChat", "chatText is empty")
+                setLoadingState(false)
                 return@launch
             }
+            val emotionCommand = ChatMessage(
+                content = "메세지에서 기쁨/슬픔/화남/보통으로 감정을 분류해주세요. (기쁨/슬픔/화남/보통) 단어로만 답변해야합니다.",
+                role = Role.SYSTEM
+            )
+
+            val emotionResponse = repository.getChatResponse(
+                messages = listOf(emotionCommand, newMessage),
+                onCompletion = {},
+                onError = {
+                    setLoadingState(false)
+                    Log.d("VideoChat", "onError: $it")
+                },
+                onException = {
+                    setLoadingState(false)
+                    Log.d("VideoChat", "onException: $it")
+                }
+            ).firstOrNull()
+
+            val emotionText = emotionResponse?.choices?.firstOrNull()?.message?.content ?: ""
+
+            val emotion = if (emotionText.contains("기쁨")) R.drawable.character_happy
+            else if (emotionText.contains("슬픔")) R.drawable.character_sad
+            else if (emotionText.contains("화남")) R.drawable.characeter_angry
+            else R.drawable.character_saying
 
             val speechResponse = repository.getSpeech(
                 chatText,
-                onCompletion = {
-                    viewModelScope.launch {
-                        _isLoading.emit(false)
-                    }
-                },
                 onError = {
                     Log.d("VideoChat", "onError: $it")
                 },
@@ -83,6 +118,7 @@ class VideoChatViewModel @Inject constructor(
 
             if (speechResponse == null) {
                 Log.d("VideoChat", "speechResponse is null")
+                setLoadingState(false)
                 return@launch
             }
 
@@ -91,13 +127,23 @@ class VideoChatViewModel @Inject constructor(
                 setDataSource(speechResponse)
                 setOnPreparedListener {
                     it.start()
+                    _characterEmotion.value = emotion
                 }
                 setOnErrorListener { _, what, extra ->
                     Log.d("VideoChat", "MediaPlayer error: what=$what, extra=$extra")
                     true
                 }
+                setOnCompletionListener {
+                    _characterEmotion.value = R.drawable.character_normal
+                }
                 prepareAsync()
             }
+        }
+    }
+
+    private fun setLoadingState(state: Boolean) {
+        viewModelScope.launch {
+            _isLoading.emit(state)
         }
     }
 

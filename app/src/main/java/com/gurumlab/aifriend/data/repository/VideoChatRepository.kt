@@ -50,6 +50,7 @@ class VideoChatRepository @Inject constructor(
 
     fun getChatResponse(
         messages: List<ChatMessage>,
+        onCompletion: () -> Unit,
         onError: (message: String?) -> Unit,
         onException: (message: String?) -> Unit
     ): Flow<ChatResponse> = flow {
@@ -63,11 +64,11 @@ class VideoChatRepository @Inject constructor(
         }.onException {
             onException(it.message)
         }
-    }.flowOn(Dispatchers.IO)
+    }.onCompletion { onCompletion() }
+        .flowOn(Dispatchers.IO)
 
     fun getSpeech(
         message: String,
-        onCompletion: () -> Unit,
         onError: (message: String?) -> Unit,
         onException: (message: String?) -> Unit
     ): Flow<InputStream> = flow {
@@ -85,6 +86,5 @@ class VideoChatRepository @Inject constructor(
         }.onException {
             onException(it.message)
         }
-    }.onCompletion { onCompletion() }
-        .flowOn(Dispatchers.IO)
+    }.flowOn(Dispatchers.IO)
 }

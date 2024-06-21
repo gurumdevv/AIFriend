@@ -99,7 +99,7 @@ fun VideoCallContent(
     var recordingState by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val isLoading by viewModel.isLoading.collectAsState(false)
-    val character = R.drawable.character_normal
+    val character by viewModel.characterEmotion.collectAsState()
 
     val onClick = {
         if (!recordingState) {
