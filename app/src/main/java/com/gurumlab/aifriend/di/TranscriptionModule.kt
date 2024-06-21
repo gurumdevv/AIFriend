@@ -1,6 +1,7 @@
 package com.gurumlab.aifriend.di
 
 import com.gurumlab.aifriend.BuildConfig
+import com.gurumlab.aifriend.data.source.local.AppDataStore
 import com.gurumlab.aifriend.data.source.remote.ApiCallAdapterFactory
 import com.gurumlab.aifriend.data.source.remote.TranscriptionApiClient
 import com.squareup.moshi.Moshi
@@ -8,6 +9,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -24,15 +27,16 @@ object TranscriptionModule {
     @Singleton
     @TranscriptionOkhttpClient
     @Provides
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(dataStore: AppDataStore): OkHttpClient {
         val logger = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
         val header = Interceptor { chain ->
+            val apiKey = runBlocking { dataStore.getGptApiKey().firstOrNull() } ?: ""
             val newRequest = chain.request().newBuilder()
                 .addHeader("Content-Type", "multipart/form-data")
-                .addHeader("Authorization", "Bearer ${BuildConfig.GPT_API_KEY}")
+                .addHeader("Authorization", "Bearer $apiKey")
                 .build()
             chain.proceed(newRequest)
         }
