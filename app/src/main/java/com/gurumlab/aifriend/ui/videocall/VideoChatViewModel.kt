@@ -1,12 +1,13 @@
 package com.gurumlab.aifriend.ui.videocall
 
-import android.media.MediaPlayer
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gurumlab.aifriend.R
 import com.gurumlab.aifriend.data.model.ChatMessage
+import com.gurumlab.aifriend.data.model.Emotion
 import com.gurumlab.aifriend.data.repository.VideoChatRepository
+import com.gurumlab.aifriend.util.GPTConstants
+import com.gurumlab.aifriend.util.MediaHandler
 import com.gurumlab.aifriend.util.Role
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -16,129 +17,111 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.io.File
-import java.io.InputStream
 import javax.inject.Inject
 
 @HiltViewModel
 class VideoChatViewModel @Inject constructor(
-    private val repository: VideoChatRepository
+    private val repository: VideoChatRepository,
+    private val mediaHandler: MediaHandler
 ) : ViewModel() {
-
-    private var mediaPlayer: MediaPlayer? = null
 
     private val _isLoading = MutableSharedFlow<Boolean>()
     val isLoading = _isLoading.asSharedFlow()
 
-    private val _characterEmotion = MutableStateFlow(R.drawable.character_normal)
+    private val _characterEmotion = MutableStateFlow(Emotion.NORMAL.drawableRes)
     val characterEmotion = _characterEmotion.asStateFlow()
 
     fun getResponse(file: File) {
         viewModelScope.launch {
             setLoadingState(true)
-            val transcriptionResponse = repository.getTranscription(
-                file = file,
-                onError = {
-                    setLoadingState(false)
-                    Log.d("VideoChat", "onError: $it")
-                },
-                onException = {
-                    setLoadingState(false)
-                    Log.d("VideoChat", "onException: $it")
-                }
-            ).firstOrNull()
-            val transcriptionText = transcriptionResponse?.text ?: ""
 
-            if (transcriptionText.isEmpty()) {
-                Log.d("VideoChat", "transcriptionText is empty")
-                setLoadingState(false)
-                return@launch
-            }
+            val transcription = getTranscription(file)
+            if (transcription.checkAndHandleError("transcriptionText is empty")) return@launch
 
-            val newMessage = ChatMessage(
-                content = transcriptionText,
-                role = Role.USER,
-            )
+            val chatText = getChatResponse(transcription)
+            if (chatText.checkAndHandleError("chatText is empty")) return@launch
 
-            val chatResponse = repository.getChatResponse(
-                messages = listOf(newMessage),
-                onCompletion = {
-                    setLoadingState(false)
-                },
-                onError = {
-                    Log.d("VideoChat", "onError: $it")
-                    setLoadingState(false)
-                },
-                onException = {
-                    Log.d("VideoChat", "onException: $it")
-                    setLoadingState(false)
-                }
-            ).firstOrNull()
-
-            val chatText = chatResponse?.choices?.firstOrNull()?.message?.content ?: ""
-
-            if (chatText.isEmpty()) {
-                Log.d("VideoChat", "chatText is empty")
-                setLoadingState(false)
-                return@launch
-            }
-            val emotionCommand = ChatMessage(
-                content = "메세지에서 기쁨/슬픔/화남/보통으로 감정을 분류해주세요. (기쁨/슬픔/화남/보통) 단어로만 답변해야합니다.",
-                role = Role.SYSTEM
-            )
-
-            val emotionResponse = repository.getChatResponse(
-                messages = listOf(emotionCommand, newMessage),
-                onCompletion = {},
-                onError = {
-                    setLoadingState(false)
-                    Log.d("VideoChat", "onError: $it")
-                },
-                onException = {
-                    setLoadingState(false)
-                    Log.d("VideoChat", "onException: $it")
-                }
-            ).firstOrNull()
-
-            val emotionText = emotionResponse?.choices?.firstOrNull()?.message?.content ?: ""
-
-            val emotion = if (emotionText.contains("기쁨")) R.drawable.character_happy
-            else if (emotionText.contains("슬픔")) R.drawable.character_sad
-            else if (emotionText.contains("화남")) R.drawable.characeter_angry
-            else R.drawable.character_saying
-
-            val speechResponse = repository.getSpeech(
-                chatText,
-                onError = {
-                    Log.d("VideoChat", "onError: $it")
-                },
-                onException = {
-                    Log.d("VideoChat", "onException: $it")
-                }
-            ).firstOrNull()
-
-            if (speechResponse == null) {
-                Log.d("VideoChat", "speechResponse is null")
-                setLoadingState(false)
-                return@launch
-            }
-
-            mediaPlayer?.reset()
-            mediaPlayer = MediaPlayer().apply {
-                setDataSource(speechResponse)
-                setOnPreparedListener {
-                    it.start()
-                    _characterEmotion.value = emotion
-                }
-                setOnErrorListener { _, what, extra ->
-                    Log.d("VideoChat", "MediaPlayer error: what=$what, extra=$extra")
-                    true
-                }
-                setOnCompletionListener {
-                    _characterEmotion.value = R.drawable.character_normal
-                }
-                prepareAsync()
-            }
+            val emotionText = getEmotion(chatText)
+            if (!setCharacter(
+                    chatText,
+                    emotionText
+                ).also { success -> if (!success) handleError("speechResponse is null") }
+            ) return@launch
         }
+    }
+
+    private suspend fun getTranscription(file: File): String {
+        val transcriptionResponse = repository.getTranscription(
+            file = file,
+            onError = { handleError("onError: $it") },
+            onException = { handleError("onException: $it") }
+        ).firstOrNull()
+
+        return transcriptionResponse?.text ?: ""
+    }
+
+    private suspend fun getChatResponse(transcription: String): String {
+        val newMessage = ChatMessage(
+            content = transcription,
+            role = Role.USER,
+        )
+
+        val chatResponse = repository.getChatResponse(
+            messages = listOf(newMessage),
+            onCompletion = { setLoadingState(false) },
+            onError = { handleError("onError: $it") },
+            onException = { handleError("onException: $it") }
+        ).firstOrNull()
+
+        return chatResponse?.choices?.firstOrNull()?.message?.content ?: ""
+    }
+
+    private suspend fun getEmotion(text: String): String {
+        val message = ChatMessage(content = text, role = Role.USER)
+        val emotionCommand = ChatMessage(
+            content = GPTConstants.EMOTION_COMMAND,
+            role = Role.SYSTEM
+        )
+
+        val emotionResponse = repository.getChatResponse(
+            messages = listOf(emotionCommand, message),
+            onCompletion = {},
+            onError = { handleError("onError: $it") },
+            onException = { handleError("onException: $it") }
+        ).firstOrNull()
+
+        return emotionResponse?.choices?.firstOrNull()?.message?.content ?: ""
+    }
+
+    private suspend fun setCharacter(chatText: String, emotionText: String): Boolean {
+        val emotion = when {
+            emotionText.contains("기쁨") -> Emotion.HAPPY
+            emotionText.contains("슬픔") -> Emotion.SAD
+            emotionText.contains("화남") -> Emotion.ANGRY
+            else -> Emotion.SAYING
+        }
+
+        val speechResponse = repository.getSpeech(
+            chatText,
+            onError = { handleError("onError: $it") },
+            onException = { handleError("onException: $it") }
+        ).firstOrNull()
+
+        if (speechResponse == null) {
+            return false
+        }
+
+        mediaHandler.play(
+            inputStream = speechResponse,
+            onStart = {
+                _characterEmotion.value = emotion.drawableRes
+            },
+            onCompletion = {
+                _characterEmotion.value = Emotion.NORMAL.drawableRes
+            }
+        )
+
+        return true
     }
 
     private fun setLoadingState(state: Boolean) {
@@ -147,20 +130,22 @@ class VideoChatViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        mediaPlayer?.release()
-        mediaPlayer = null
-    }
-}
-
-private fun MediaPlayer.setDataSource(inputStream: InputStream) {
-    val tempFile = File.createTempFile("tempMedia", "mp3")
-    tempFile.deleteOnExit()
-    inputStream.use { input ->
-        tempFile.outputStream().use { output ->
-            input.copyTo(output)
+    private fun String.checkAndHandleError(errorMessage: String): Boolean {
+        return if (this.isEmpty()) {
+            handleError(errorMessage)
+            true
+        } else {
+            false
         }
     }
-    setDataSource(tempFile.absolutePath)
+
+    private fun handleError(message: String) {
+        Log.d("VideoChat", message)
+        setLoadingState(false)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        mediaHandler.release()
+    }
 }
