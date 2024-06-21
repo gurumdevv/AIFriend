@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -51,11 +53,15 @@ fun HomeScreen(
                         .padding(10.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    ImageButton(
-                        imageId = R.drawable.ic_setting,
-                        contentDescription = stringResource(R.string.ic_setting),
-                        onClick = onNavigateToSettings
-                    )
+                    IconButton(onClick = { onNavigateToSettings() }) {
+                        CustomImage(
+                            modifier = Modifier
+                                .size(50.dp)
+                                .padding(5.dp),
+                            imageId = R.drawable.ic_setting,
+                            contentDescription = stringResource(R.string.ic_setting),
+                        )
+                    }
                 }
 
                 BottomComposable(
