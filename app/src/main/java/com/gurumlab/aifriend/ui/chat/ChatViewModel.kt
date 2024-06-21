@@ -53,6 +53,6 @@ class ChatViewModel @Inject constructor(
     }
 
     private suspend fun getLastMessage(): List<ChatMessage> {
-        return repository.getLastFiveMessages().firstOrNull() ?: emptyList()
+        return repository.getLastThreeMessages().firstOrNull() ?: emptyList()
     }
 }

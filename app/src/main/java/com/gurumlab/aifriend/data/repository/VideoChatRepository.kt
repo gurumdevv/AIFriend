@@ -5,6 +5,7 @@ import com.gurumlab.aifriend.data.model.ChatRequest
 import com.gurumlab.aifriend.data.model.ChatResponse
 import com.gurumlab.aifriend.data.model.SpeechRequest
 import com.gurumlab.aifriend.data.model.TranscriptionResponse
+import com.gurumlab.aifriend.data.source.local.ChatDao
 import com.gurumlab.aifriend.data.source.remote.ChatApiClient
 import com.gurumlab.aifriend.data.source.remote.SpeechApiClient
 import com.gurumlab.aifriend.data.source.remote.TranscriptionApiClient
@@ -26,7 +27,8 @@ import javax.inject.Inject
 class VideoChatRepository @Inject constructor(
     private val chatApiClient: ChatApiClient,
     private val transcriptionApiClient: TranscriptionApiClient,
-    private val speechApiClient: SpeechApiClient
+    private val speechApiClient: SpeechApiClient,
+    private val chatDao: ChatDao
 ) {
 
     fun getTranscription(
@@ -87,4 +89,12 @@ class VideoChatRepository @Inject constructor(
             onException(it.message)
         }
     }.flowOn(Dispatchers.IO)
+
+    fun getLastThreeMessages(): Flow<List<ChatMessage>> = flow {
+        emit(chatDao.getThreeMessages())
+    }.flowOn(Dispatchers.IO)
+
+    suspend fun insertMessage(message: ChatMessage) {
+        chatDao.insertMessage(message)
+    }
 }

@@ -65,19 +65,19 @@ class VideoChatViewModel @Inject constructor(
     }
 
     private suspend fun getChatResponse(transcription: String): String {
-        val newMessage = ChatMessage(
-            content = transcription,
-            role = Role.USER,
-        )
-
+        val newMessage = listOf(ChatMessage(content = transcription, role = Role.USER))
+        val lastMessage = getLastMessage()
+        addMessage(content = transcription, role = Role.USER)
         val chatResponse = repository.getChatResponse(
-            messages = listOf(newMessage),
+            messages = (newMessage + lastMessage).reversed(),
             onCompletion = { setLoadingState(false) },
             onError = { handleError("onError: $it") },
             onException = { handleError("onException: $it") }
         ).firstOrNull()
 
-        return chatResponse?.choices?.firstOrNull()?.message?.content ?: ""
+        val chatText = chatResponse?.choices?.firstOrNull()?.message?.content ?: ""
+        addMessage(content = chatText, role = Role.ASSISTANT)
+        return chatText
     }
 
     private suspend fun getEmotion(text: String): String {
@@ -127,6 +127,19 @@ class VideoChatViewModel @Inject constructor(
         )
 
         return true
+    }
+
+    private suspend fun addMessage(role: String, content: String) {
+        repository.insertMessage(
+            ChatMessage(
+                role = role,
+                content = content
+            )
+        )
+    }
+
+    private suspend fun getLastMessage(): List<ChatMessage> {
+        return repository.getLastThreeMessages().firstOrNull() ?: emptyList()
     }
 
     private fun setLoadingState(state: Boolean) {
