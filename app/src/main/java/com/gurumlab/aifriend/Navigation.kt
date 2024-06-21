@@ -1,5 +1,7 @@
 package com.gurumlab.aifriend
 
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -29,7 +31,9 @@ fun AIFriendNavHost(
         navController = navController,
         startDestination = HOME_ROUTE,
     ) {
-        composable(HOME_ROUTE) {
+        composable(
+            route = HOME_ROUTE
+        ) {
             HomeRoute(
                 onNavigateToChat = { navController.navigate(CHAT_ROUTE) },
                 onNavigateToVideoCall = { navController.navigate(VIDEO_CALL_ROUTE) },
@@ -37,19 +41,31 @@ fun AIFriendNavHost(
             )
         }
 
-        composable(CHAT_ROUTE) {
+        composable(
+            route = CHAT_ROUTE,
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
+        ) {
             ChatRoute(
                 onNavUp = { navController.navigateUp() }
             )
         }
 
-        composable(VIDEO_CALL_ROUTE) {
+        composable(
+            route = VIDEO_CALL_ROUTE,
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
+        ) {
             VideoChatRoute(
                 onNavUp = { navController.navigateUp() }
             )
         }
 
-        composable(SETTINGS_ROUTE) {
+        composable(
+            route = SETTINGS_ROUTE,
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
+        ) {
             SettingsRoute(
                 onNavUp = { navController.navigateUp() }
             )
