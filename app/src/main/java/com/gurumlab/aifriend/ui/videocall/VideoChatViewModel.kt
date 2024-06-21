@@ -3,6 +3,7 @@ package com.gurumlab.aifriend.ui.videocall
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gurumlab.aifriend.R
 import com.gurumlab.aifriend.data.model.ChatMessage
 import com.gurumlab.aifriend.data.model.Emotion
 import com.gurumlab.aifriend.data.repository.VideoChatRepository
@@ -30,6 +31,9 @@ class VideoChatViewModel @Inject constructor(
 
     private val _characterEmotion = MutableStateFlow(Emotion.NORMAL.drawableRes)
     val characterEmotion = _characterEmotion.asStateFlow()
+
+    private val _snackbarMessage = MutableSharedFlow<Int>()
+    val snackbarMessage = _snackbarMessage.asSharedFlow()
 
     fun getResponse(file: File) {
         viewModelScope.launch {
@@ -111,13 +115,14 @@ class VideoChatViewModel @Inject constructor(
             return false
         }
 
-        mediaHandler.play(
+        mediaHandler.playMediaPlayer(
             inputStream = speechResponse,
             onStart = {
                 _characterEmotion.value = emotion.drawableRes
             },
             onCompletion = {
                 _characterEmotion.value = Emotion.NORMAL.drawableRes
+                mediaHandler.releaseMediaPlayer()
             }
         )
 
@@ -133,6 +138,7 @@ class VideoChatViewModel @Inject constructor(
     private fun String.checkAndHandleError(errorMessage: String): Boolean {
         return if (this.isEmpty()) {
             handleError(errorMessage)
+            viewModelScope.launch { _snackbarMessage.emit(R.string.fail_response) }
             true
         } else {
             false
@@ -144,8 +150,14 @@ class VideoChatViewModel @Inject constructor(
         setLoadingState(false)
     }
 
+    fun setSnackbarMessage(messageRes: Int) {
+        viewModelScope.launch {
+            _snackbarMessage.emit(messageRes)
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
-        mediaHandler.release()
+        mediaHandler.releaseMediaPlayer()
     }
 }

@@ -21,4 +21,5 @@
     <string name="request_record_permission_again">녹음 권한은 필수 입니다.\n녹음 권한을 허용해주세요.</string>
     <string name="request_record_permission">녹음 권한이 필요합니다.</string>
     <string name="waiting_response">응답 대기중</string>
+    <string name="fail_recording">음성 녹음에 실패했습니다.</string>
 </resources>
