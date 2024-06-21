@@ -68,6 +68,7 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.datastore.preferences)
     implementation (libs.accompanist.permissions)
     implementation(libs.lottie.compose)
     implementation(libs.androidx.room.paging)
