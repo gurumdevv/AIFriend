@@ -1,6 +1,6 @@
 ![aipp](https://github.com/gurumdevv/AIFriend/assets/129643788/cec5992f-e34c-4317-8204-245219a20ebb)
 
-# AIFriend - 언제든지 곁에서 이야기할 수 있는 친구 같은 AI Friend
+# AIFriend
 
 ## Project Explanation
 🌟 귀여운 친구 곰돌이와 채팅할 수 있습니다.<br>
@@ -14,7 +14,7 @@
 ## Screenshot
 <p align="center">
 <img src="https://github.com/gurumdevv/AIFriend/assets/129643788/3e44fe85-03e2-4fa5-b6c5-7bbca9cedfd2" width="23%" height="30%">
-<img src="https://github.com/gurumdevv/AIFriend/assets/129643788/dc2d4431-5b1b-4d37-b371-ccef7c9ddca4" width="23%" height="30%">
+<img src="https://github.com/gurumdevv/AIFriend/assets/129643788/f87606ec-2037-4290-820d-7756809e967f" width="23%" height="30%">
 <img src="https://github.com/gurumdevv/AIFriend/assets/129643788/d9b7d569-1598-4025-a267-6ed6e9071550" width="23%" height="30%">
 <img src="https://github.com/gurumdevv/AIFriend/assets/129643788/418a3076-0af2-4582-9e7d-01a5e4e89cd9" width="23%" height="30%">
 </p>
@@ -43,7 +43,7 @@
 
 ## How to Download
 아래 링크에서 apk 파일을 다운받으실 수 있습니다.<br><br>
-<a href="https://drive.google.com/file/d/1PmDnAbbooL_zpm78nLe2Dt4Ga4nlhfAC/view?usp=sharing">
+<a href="https://drive.google.com/drive/folders/1Z-EJgq0-X-6tzTsR5u8oAXfQIQib6IrW?usp=sharing">
     <img src="https://github.com/gurumdevv/VocaRoutine/assets/129643788/bb151951-8222-4d6d-b729-9cbc959707f5" alt="어원으로 암기" width="45" height="45">
 </a> 
 &nbsp;&nbsp;← 구글 드라이브 아이콘을 클릭해주세요.
