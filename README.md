@@ -1,4 +1,4 @@
-![aifirend](https://github.com/gurumdevv/AIFriend/assets/129643788/4d743e5c-8adf-41f6-865f-0414aa9c4da1)
+![aipp](https://github.com/gurumdevv/AIFriend/assets/129643788/cec5992f-e34c-4317-8204-245219a20ebb)
 
 # AIFriend - 언제든지 곁에서 이야기할 수 있는 친구 같은 AI Friend
 
@@ -13,10 +13,10 @@
 
 ## Screenshot
 <p align="center">
-<img src="https://github.com/gurumdevv/AIFriend/assets/129643788/beaa9b52-ae0f-4613-86dd-e4752182d7a0" width="23%" height="30%">
-<img src="https://github.com/gurumdevv/AIFriend/assets/129643788/ee842381-e7b8-4eb4-925a-d5588b66d1aa" width="23%" height="30%">
-<img src="https://github.com/gurumdevv/AIFriend/assets/129643788/0929005d-3674-47ad-9b86-7661157976db" width="23%" height="30%">
-<img src="https://github.com/gurumdevv/AIFriend/assets/129643788/ef4a27b1-6b94-43e2-b263-200247a3d53b" width="23%" height="30%">
+<img src="https://github.com/gurumdevv/AIFriend/assets/129643788/3e44fe85-03e2-4fa5-b6c5-7bbca9cedfd2" width="23%" height="30%">
+<img src="https://github.com/gurumdevv/AIFriend/assets/129643788/dc2d4431-5b1b-4d37-b371-ccef7c9ddca4" width="23%" height="30%">
+<img src="https://github.com/gurumdevv/AIFriend/assets/129643788/d9b7d569-1598-4025-a267-6ed6e9071550" width="23%" height="30%">
+<img src="https://github.com/gurumdevv/AIFriend/assets/129643788/418a3076-0af2-4582-9e7d-01a5e4e89cd9" width="23%" height="30%">
 </p>
 
 ## App Architecture
@@ -30,12 +30,16 @@
 | Category | Stack |
 | --- | --- |
 | **Architecture** | MVVM |
-| **Android Jetpack** | ViewModel, Compose, Navigation, Room |
+| **Android Jetpack** | Compose, ViewModel, Navigation, Room |
 | **Dependency Injection** | Hilt |
 | **Networking** | Retrofit2, OkHttp3 |
 | **Asynchronous** | Coroutine, Flow, SharedFlow, StateFlow |
 | **Local DB** | Room, DataStore |
 | **Media** | MediaRecorder, MediaPlayer |
+
+## How to Use
+1. OpenAI 계정을 생성하고 API Key를 발급받습니다.
+2. 앱 홈 화면의 오른쪽 상단 설정 버튼을 터치 > API Key 항목의 편집 버튼을 터치 > Dialog에서 API Key를 입력한 후 확인 버튼을 터치 순으로 진행합니다.<br>
 
 ## How to Download
 아래 링크에서 apk 파일을 다운받으실 수 있습니다.<br><br>
