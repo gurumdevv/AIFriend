@@ -1,8 +1,8 @@
 import java.io.FileInputStream
 import java.util.Properties
 
-val localPropertiesFile = rootProject.file("local.properties")
-val localProperties = Properties().apply { load(FileInputStream(localPropertiesFile)) }
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply { load(FileInputStream(keystorePropertiesFile)) }
 
 plugins {
     alias(libs.plugins.android.application)
@@ -14,6 +14,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
+        }
+    }
     namespace = "com.gurumlab.aifriend"
     compileSdk = 34
 
@@ -23,9 +31,6 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
-        android.buildFeatures.buildConfig = true
-
-        buildConfigField("String", "GPT_API_KEY", localProperties["gpt_api_key"] as String)
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -39,11 +44,19 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            versionNameSuffix = "-release"
+            ndk { debugSymbolLevel = "FULL" }
+        }
+        debug {
+            isMinifyEnabled = false
+            versionNameSuffix = "-debug"
         }
     }
     compileOptions {
@@ -69,7 +82,7 @@ android {
 dependencies {
 
     implementation(libs.androidx.datastore.preferences)
-    implementation (libs.accompanist.permissions)
+    implementation(libs.accompanist.permissions)
     implementation(libs.lottie.compose)
     implementation(libs.androidx.room.paging)
     implementation(libs.androidx.paging.runtime.ktx)

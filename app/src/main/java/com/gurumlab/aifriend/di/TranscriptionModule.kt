@@ -1,6 +1,5 @@
 package com.gurumlab.aifriend.di
 
-import com.gurumlab.aifriend.BuildConfig
 import com.gurumlab.aifriend.data.source.local.AppDataStore
 import com.gurumlab.aifriend.data.source.remote.ApiCallAdapterFactory
 import com.gurumlab.aifriend.data.source.remote.TranscriptionApiClient
