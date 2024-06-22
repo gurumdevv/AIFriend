@@ -30,7 +30,7 @@
 | Category | Stack |
 | --- | --- |
 | **Architecture** | MVVM |
-| **Android Jetpack** | Compose, ViewModel, Navigation, Room |
+| **Android Jetpack** | Compose, ViewModel, Navigation, Room, Paging 3 |
 | **Dependency Injection** | Hilt |
 | **Networking** | Retrofit2, OkHttp3 |
 | **Asynchronous** | Coroutine, Flow, SharedFlow, StateFlow |
