@@ -13,13 +13,17 @@ import com.gurumlab.aifriend.data.source.remote.onError
 import com.gurumlab.aifriend.data.source.remote.onException
 import com.gurumlab.aifriend.data.source.remote.onSuccess
 import com.gurumlab.aifriend.util.GPTConstants
+import com.gurumlab.aifriend.util.MediaTypes
 import com.gurumlab.aifriend.util.Role
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.InputStream
 import javax.inject.Inject
@@ -36,10 +40,21 @@ class VideoChatRepository @Inject constructor(
         onError: (message: String?) -> Unit,
         onException: (message: String?) -> Unit
     ): Flow<TranscriptionResponse> = flow {
+        val map = HashMap<String, RequestBody>()
+        val requestFile = file.asRequestBody(MediaTypes.MP3.type.toMediaTypeOrNull())
+        val multiPartBody = MultipartBody.Part.createFormData(FILE, file.name, requestFile)
+
+        val model =
+            GPTConstants.TRANSCRIPTION_MODEL.toRequestBody(MediaTypes.STRING.type.toMediaTypeOrNull())
+        val language =
+            GPTConstants.TRANSCRIPTION_LANGUAGE.toRequestBody(MediaTypes.STRING.type.toMediaTypeOrNull())
+
+        map[MODEL] = model
+        map[LANGUAGE] = language
+
         val response = transcriptionApiClient.getResponse(
-            MultipartBody.Part.createFormData("file", file.name, file.asRequestBody()),
-            MultipartBody.Part.createFormData("model", GPTConstants.TRANSCRIPTION_MODEL),
-            MultipartBody.Part.createFormData("language", GPTConstants.TRANSCRIPTION_LANGUAGE)
+            multiPartBody,
+            map
         )
         response.onSuccess {
             emit(it)
@@ -96,5 +111,11 @@ class VideoChatRepository @Inject constructor(
 
     suspend fun insertMessage(message: ChatMessage) {
         chatDao.insertMessage(message)
+    }
+
+    companion object {
+        private const val FILE = "file"
+        private const val MODEL = "model"
+        private const val LANGUAGE = "language"
     }
 }
