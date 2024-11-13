@@ -20,7 +20,7 @@
 </p>
 
 ## App Architecture
-<img width="960" alt="appArchitecure" src="https://github.com/gurumdevv/AIFriend/assets/129643788/aabfdedf-72ea-4827-8aba-b34d1db82fe3">
+<img width="960" alt="appArchitecure" src="https://github.com/user-attachments/assets/7a1e83aa-b52e-49a1-b4b8-1fdb075e1f84">
 
 ## History
 ✔️ **2023.05 ~ 2023.06:** 개발 완료<br>
