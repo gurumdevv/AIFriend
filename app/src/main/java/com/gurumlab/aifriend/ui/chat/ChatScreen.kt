@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -37,8 +38,6 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -59,6 +58,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.gurumlab.aifriend.R
@@ -71,7 +72,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun ChatScreen(
     onNavUp: () -> Unit,
-    viewModel: ChatViewModel
 ) {
     val scrollState = rememberLazyListState()
     val topBarState = rememberTopAppBarState()
@@ -94,8 +94,7 @@ fun ChatScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding),
-            scrollState = scrollState,
-            viewModel = viewModel
+            scrollState = scrollState
         )
     }
 }
@@ -104,14 +103,14 @@ fun ChatScreen(
 fun ChatContent(
     modifier: Modifier = Modifier,
     scrollState: LazyListState = rememberLazyListState(),
-    viewModel: ChatViewModel
+    viewModel: ChatViewModel = hiltViewModel<ChatViewModel>()
 ) {
-
     val chatMessages = viewModel.chatMessages.collectAsLazyPagingItems()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+
     var inputFieldHeight by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val isLoading = viewModel.isLoading.collectAsState(false)
 
     val jumpToBottomButtonEnabled by remember {
         derivedStateOf {
@@ -137,19 +136,17 @@ fun ChatContent(
         }
     }
 
-    Box(modifier = modifier.imePadding()) {
+    Box(modifier = modifier) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
             Messages(
-                modifier = Modifier.weight(1f),
                 messages = chatMessages,
-                scrollState = scrollState
+                scrollState = scrollState,
+                modifier = Modifier.weight(1f)
             )
             ChatInput(
-                modifier = Modifier
-                    .padding(horizontal = 7.dp)
-                    .navigationBarsPadding(),
+                isLoading = isLoading,
                 onFocus = {
                     scope.launch {
                         goToBottom()
@@ -164,7 +161,10 @@ fun ChatContent(
                 onSizeChanged = { height ->
                     inputFieldHeight = height
                 },
-                isLoading = isLoading
+                modifier = Modifier
+                    .padding(horizontal = 7.dp)
+                    .consumeWindowInsets(WindowInsets.navigationBars.asPaddingValues())
+                    .imePadding()
             )
         }
 
@@ -186,9 +186,9 @@ fun ChatContent(
 
 @Composable
 fun Messages(
-    modifier: Modifier = Modifier,
     messages: LazyPagingItems<ChatMessage>,
-    scrollState: LazyListState
+    scrollState: LazyListState,
+    modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
@@ -217,11 +217,11 @@ fun Messages(
 
 @Composable
 fun ChatInput(
-    modifier: Modifier = Modifier,
+    isLoading: Boolean,
     onFocus: () -> Unit,
     onMessageSent: (String) -> Unit,
     onSizeChanged: (Int) -> Unit,
-    isLoading: State<Boolean>
+    modifier: Modifier = Modifier
 ) {
     var textState by rememberSaveable { mutableStateOf("") }
 
@@ -271,7 +271,7 @@ fun ChatInput(
 
             IconButton(
                 onClick = onClick,
-                enabled = !isLoading.value
+                enabled = !isLoading
             ) {
                 Icon(
                     modifier = Modifier,
