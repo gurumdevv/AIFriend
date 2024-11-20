@@ -1,13 +1,14 @@
 package com.gurumlab.aifriend.ui.chat
 
+import android.content.Context
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,10 +16,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -64,6 +68,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.gurumlab.aifriend.R
 import com.gurumlab.aifriend.data.model.ChatMessage
+import com.gurumlab.aifriend.ui.theme.edit_text_background
 import com.gurumlab.aifriend.ui.theme.primaryLight
 import com.gurumlab.aifriend.util.Role
 import kotlinx.coroutines.launch
@@ -91,18 +96,19 @@ fun ChatScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { innerPadding ->
         ChatContent(
+            scrollState = scrollState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            scrollState = scrollState
+                .padding(innerPadding)
+                .navigationBarsPadding()
         )
     }
 }
 
 @Composable
 fun ChatContent(
+    scrollState: LazyListState,
     modifier: Modifier = Modifier,
-    scrollState: LazyListState = rememberLazyListState(),
     viewModel: ChatViewModel = hiltViewModel<ChatViewModel>()
 ) {
     val chatMessages = viewModel.chatMessages.collectAsLazyPagingItems()
@@ -131,9 +137,7 @@ fun ChatContent(
     }
 
     LaunchedEffect(chatMessages.itemCount) {
-        if (chatMessages.itemCount > 0) {
-            goToBottom()
-        }
+        goToBottom()
     }
 
     Box(modifier = modifier) {
@@ -143,6 +147,7 @@ fun ChatContent(
             Messages(
                 messages = chatMessages,
                 scrollState = scrollState,
+                context = context,
                 modifier = Modifier.weight(1f)
             )
             ChatInput(
@@ -163,7 +168,6 @@ fun ChatContent(
                 },
                 modifier = Modifier
                     .padding(horizontal = 7.dp)
-                    .consumeWindowInsets(WindowInsets.navigationBars.asPaddingValues())
                     .imePadding()
             )
         }
@@ -188,26 +192,23 @@ fun ChatContent(
 fun Messages(
     messages: LazyPagingItems<ChatMessage>,
     scrollState: LazyListState,
+    context: Context,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
     ) {
-        val context = LocalContext.current
-
         LazyColumn(
             state = scrollState,
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
-            items(messages.itemCount) { index ->
-                messages[messages.itemCount - 1 - index]?.let { message ->
-
-                    if (message.role == Role.USER) {
-                        UserMessage(message = message.content)
-                    } else {
-                        BotMessage(message = message.content.ifEmpty { context.getString(R.string.fail_response) })
-                    }
+            items(
+                items = messages.itemSnapshotList.items,
+                key = { message -> message.id }) { message ->
+                if (message.role == Role.USER) {
+                    UserMessage(message = message.content)
+                } else {
+                    BotMessage(message = message.content.ifEmpty { context.getString(R.string.fail_response) })
                 }
                 Spacer(modifier = Modifier.height(14.dp))
             }
@@ -242,14 +243,27 @@ fun ChatInput(
 
     Box(
         modifier = modifier
+            .background(
+                color = edit_text_background,
+                shape = RoundedCornerShape(
+                    topStart = 45.dp,
+                    topEnd = 45.dp,
+                    bottomEnd = 45.dp,
+                    bottomStart = 45.dp
+                )
+            )
+            .border(
+                width = 1.dp,
+                color = primaryLight,
+                shape = RoundedCornerShape(
+                    topStart = 45.dp,
+                    topEnd = 45.dp,
+                    bottomEnd = 45.dp,
+                    bottomStart = 45.dp
+                )
+            )
             .onSizeChanged { size -> onSizeChanged(size.height) }
     ) {
-        CustomEditTextBackground(
-            modifier = Modifier
-                .fillMaxWidth()
-                .matchParentSize()
-        )
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()

@@ -29,7 +29,8 @@ class ChatViewModel @Inject constructor(
 
     fun getResponse(content: String, loadingMessage: String) {
         viewModelScope.launch {
-            _isLoading.emit(true)
+            _isLoading.value = true
+
             val newMessage = listOf(ChatMessage(role = Role.USER, content = content))
             val lastMessage = getLastMessage()
             addMessage(Role.USER, content)
@@ -46,7 +47,8 @@ class ChatViewModel @Inject constructor(
             val responseMessage = response?.choices?.firstOrNull()?.message?.content ?: ""
             repository.deleteLoadingMessage()
             addMessage(Role.ASSISTANT, responseMessage)
-            _isLoading.emit(false)
+
+            _isLoading.value = false
         }
     }
 
