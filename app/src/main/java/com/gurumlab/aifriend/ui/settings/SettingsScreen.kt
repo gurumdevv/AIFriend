@@ -33,13 +33,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.gurumlab.aifriend.R
 import com.gurumlab.aifriend.ui.utils.CustomComposable.CustomText
 
 @Composable
 fun SettingScreen(
     onNavUp: () -> Unit,
-    viewModel: SettingViewModel
 ) {
     Scaffold(
         topBar = {
@@ -51,8 +51,7 @@ fun SettingScreen(
         SettingContent(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
-            viewModel = viewModel
+                .padding(innerPadding)
         )
     }
 }
@@ -60,25 +59,25 @@ fun SettingScreen(
 @Composable
 fun SettingContent(
     modifier: Modifier = Modifier,
-    viewModel: SettingViewModel
+    viewModel: SettingViewModel = hiltViewModel<SettingViewModel>()
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp)
     ) {
-        val gptApiKey = viewModel.gptApiKey.collectAsState()
+        val gptApiKey by viewModel.gptApiKey.collectAsState()
         var showDialog by remember { mutableStateOf(false) }
 
         if (showDialog) {
             ApiKeyDialog(
-                setApiKey = gptApiKey.value,
-                onDismissRequest = {
+                setApiKey = gptApiKey,
+                onDismissRequest = { showDialog = false },
+                onConfirmation = { newApiKey ->
                     showDialog = false
-                }) { newApiKey ->
-                showDialog = false
-                viewModel.setGptApiKey(newApiKey)
-            }
+                    viewModel.setGptApiKey(newApiKey)
+                }
+            )
         }
 
         Row(
@@ -101,7 +100,7 @@ fun SettingContent(
                 Spacer(modifier = Modifier.height(15.dp))
 
                 CustomText(
-                    value = gptApiKey.value.ifEmpty { stringResource(R.string.not_set_yet) },
+                    value = gptApiKey.ifEmpty { stringResource(R.string.not_set_yet) },
                     color = Color.Black,
                     textAlign = TextAlign.End,
                     fontStyle = MaterialTheme.typography.bodyLarge,
