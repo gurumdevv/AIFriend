@@ -7,20 +7,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.gurumlab.aifriend.Destinations.CHAT_ROUTE
-import com.gurumlab.aifriend.Destinations.HOME_ROUTE
-import com.gurumlab.aifriend.Destinations.SETTINGS_ROUTE
-import com.gurumlab.aifriend.Destinations.VIDEO_CALL_ROUTE
 import com.gurumlab.aifriend.ui.chat.ChatRoute
 import com.gurumlab.aifriend.ui.home.HomeRoute
 import com.gurumlab.aifriend.ui.settings.SettingsRoute
 import com.gurumlab.aifriend.ui.videocall.VideoChatRoute
 
-object Destinations {
-    const val HOME_ROUTE = "home"
-    const val CHAT_ROUTE = "chat"
-    const val VIDEO_CALL_ROUTE = "video_call"
-    const val SETTINGS_ROUTE = "settings"
+enum class AIFriendScreen {
+    HOME,
+    CHAT,
+    VIDEO_CALL,
+    SETTINGS
 }
 
 @Composable
@@ -29,20 +25,20 @@ fun AIFriendNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = HOME_ROUTE,
+        startDestination = AIFriendScreen.HOME.name,
     ) {
         composable(
-            route = HOME_ROUTE
+            route = AIFriendScreen.HOME.name
         ) {
             HomeRoute(
-                onNavigateToChat = { navController.navigate(CHAT_ROUTE) },
-                onNavigateToVideoCall = { navController.navigate(VIDEO_CALL_ROUTE) },
-                onNavigateToSettings = { navController.navigate(SETTINGS_ROUTE) }
+                onNavigateToChat = { navController.navigate(AIFriendScreen.CHAT.name) },
+                onNavigateToVideoCall = { navController.navigate(AIFriendScreen.VIDEO_CALL.name) },
+                onNavigateToSettings = { navController.navigate(AIFriendScreen.SETTINGS.name) }
             )
         }
 
         composable(
-            route = CHAT_ROUTE,
+            route = AIFriendScreen.CHAT.name,
             enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
             exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
         ) {
@@ -52,7 +48,7 @@ fun AIFriendNavHost(
         }
 
         composable(
-            route = VIDEO_CALL_ROUTE,
+            route = AIFriendScreen.VIDEO_CALL.name,
             enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
             exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
         ) {
@@ -62,7 +58,7 @@ fun AIFriendNavHost(
         }
 
         composable(
-            route = SETTINGS_ROUTE,
+            route = AIFriendScreen.SETTINGS.name,
             enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
             exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
         ) {

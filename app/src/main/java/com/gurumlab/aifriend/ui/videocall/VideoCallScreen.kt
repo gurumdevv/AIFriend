@@ -33,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.gurumlab.aifriend.R
 import com.gurumlab.aifriend.ui.utils.CustomComposable.CustomImage
 import com.gurumlab.aifriend.util.MediaHandler
@@ -83,7 +84,7 @@ fun VideoCallContent(
     mediaHandler: MediaHandler
 ) {
     val recordPermissionState =
-        rememberPermissionStateSafe(Manifest.permission.RECORD_AUDIO)
+        rememberPermissionState(Manifest.permission.RECORD_AUDIO)
     var recordingState by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val isLoading by viewModel.isLoading.collectAsState(false)
