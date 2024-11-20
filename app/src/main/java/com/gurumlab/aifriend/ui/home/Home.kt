@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -28,26 +30,68 @@ import com.gurumlab.aifriend.ui.utils.CustomComposable.CustomImage
 import com.gurumlab.aifriend.ui.utils.CustomComposable.CustomText
 
 @Composable
-fun BottomComposable(
-    modifier: Modifier = Modifier,
+fun HomeBackground() {
+    Box(Modifier.fillMaxSize()) {
+        CustomImage(
+            imageId = R.drawable.bg_main,
+            contentDescription = stringResource(R.string.background_image),
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Column(modifier = Modifier.fillMaxSize()) {
+            Spacer(modifier = Modifier.weight(1f))
+            GradientBox(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+fun SettingButton(
+    onNavigateToSettings: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        horizontalArrangement = Arrangement.End
+    ) {
+        IconButton(onClick = { onNavigateToSettings() }) {
+            CustomImage(
+                modifier = Modifier
+                    .size(50.dp)
+                    .padding(5.dp),
+                imageId = R.drawable.ic_setting,
+                contentDescription = stringResource(R.string.ic_setting),
+            )
+        }
+    }
+}
+
+@Composable
+fun ProfileAndButtonsArea(
     onNavigateToChat: () -> Unit,
-    onNavigateToVideoCall: () -> Unit
+    onNavigateToVideoCall: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         CustomText(
-            modifier = Modifier.fillMaxWidth(),
             value = stringResource(R.string.character_name),
             fontStyle = MaterialTheme.typography.headlineLarge,
             color = Color.White,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(10.dp))
         CustomText(
-            modifier = Modifier.fillMaxWidth(),
             value = stringResource(R.string.profile_message),
             fontStyle = MaterialTheme.typography.bodyLarge,
             color = Color.White,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(30.dp))
         Row(

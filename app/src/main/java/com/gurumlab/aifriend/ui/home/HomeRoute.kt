@@ -8,7 +8,6 @@ fun HomeRoute(
     onNavigateToVideoCall: () -> Unit,
     onNavigateToSettings: () -> Unit,
 ) {
-
     HomeScreen(
         onNavigateToChat = onNavigateToChat,
         onNavigateToVideoCall = onNavigateToVideoCall,
