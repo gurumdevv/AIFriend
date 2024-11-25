@@ -9,7 +9,8 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.exclude
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,9 +32,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -52,7 +51,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
@@ -89,10 +87,6 @@ fun ChatScreen(
                 onNavIconPressed = onNavUp
             )
         },
-        contentWindowInsets = ScaffoldDefaults
-            .contentWindowInsets
-            .exclude(WindowInsets.navigationBars)
-            .exclude(WindowInsets.ime),
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { innerPadding ->
         ChatContent(
@@ -136,7 +130,10 @@ fun ChatContent(
         }
     }
 
-    LaunchedEffect(chatMessages.itemCount) {
+    val currentKeyboardHeight =
+        WindowInsets.ime.asPaddingValues().calculateBottomPadding().value
+
+    LaunchedEffect(currentKeyboardHeight, chatMessages.itemCount) {
         goToBottom()
     }
 
@@ -152,11 +149,6 @@ fun ChatContent(
             )
             ChatInput(
                 isLoading = isLoading,
-                onFocus = {
-                    scope.launch {
-                        goToBottom()
-                    }
-                },
                 onMessageSent = { content ->
                     viewModel.getResponse(
                         content = content,
@@ -167,7 +159,8 @@ fun ChatContent(
                     inputFieldHeight = height
                 },
                 modifier = Modifier
-                    .padding(horizontal = 7.dp)
+                    .fillMaxWidth()
+                    .consumeWindowInsets(WindowInsets.navigationBars.asPaddingValues())
                     .imePadding()
             )
         }
@@ -219,7 +212,6 @@ fun Messages(
 @Composable
 fun ChatInput(
     isLoading: Boolean,
-    onFocus: () -> Unit,
     onMessageSent: (String) -> Unit,
     onSizeChanged: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -241,59 +233,44 @@ fun ChatInput(
         }
     }
 
-    Box(
+    Row(
         modifier = modifier
+            .padding(horizontal = 7.dp)
             .background(
                 color = edit_text_background,
-                shape = RoundedCornerShape(
-                    topStart = 45.dp,
-                    topEnd = 45.dp,
-                    bottomEnd = 45.dp,
-                    bottomStart = 45.dp
-                )
+                shape = RoundedCornerShape(45.dp)
             )
             .border(
                 width = 1.dp,
                 color = primaryLight,
-                shape = RoundedCornerShape(
-                    topStart = 45.dp,
-                    topEnd = 45.dp,
-                    bottomEnd = 45.dp,
-                    bottomStart = 45.dp
-                )
+                shape = RoundedCornerShape(45.dp)
             )
-            .onSizeChanged { size -> onSizeChanged(size.height) }
+            .padding(horizontal = 7.dp)
+            .onSizeChanged { size -> onSizeChanged(size.height) },
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        TextField(
+            value = textState,
+            onValueChange = { textState = it },
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 7.dp)
-                .onFocusEvent { onFocus() },
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TextField(
-                value = textState,
-                onValueChange = { textState = it },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(IntrinsicSize.Min),
-                colors = textFieldColors,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
-                keyboardActions = KeyboardActions(onSend = { onClick() }),
-                placeholder = { Text(stringResource(R.string.please_text_message)) }
-            )
+                .weight(1f)
+                .height(IntrinsicSize.Min),
+            colors = textFieldColors,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
+            keyboardActions = KeyboardActions(onSend = { onClick() }),
+            placeholder = { Text(stringResource(R.string.please_text_message)) }
+        )
 
-            IconButton(
-                onClick = onClick,
-                enabled = !isLoading
-            ) {
-                Icon(
-                    modifier = Modifier,
-                    painter = painterResource(id = R.drawable.ic_send),
-                    contentDescription = stringResource(R.string.btn_send),
-                    tint = primaryLight
-                )
-            }
+        IconButton(
+            onClick = onClick,
+            enabled = !isLoading
+        ) {
+            Icon(
+                modifier = Modifier,
+                painter = painterResource(id = R.drawable.ic_send),
+                contentDescription = stringResource(R.string.btn_send),
+                tint = primaryLight
+            )
         }
     }
 }
@@ -305,10 +282,6 @@ fun ChatAppBar(
     onNavIconPressed: () -> Unit = {}
 ) {
     CenterAlignedTopAppBar(
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color.Transparent,
-            titleContentColor = MaterialTheme.colorScheme.primary,
-        ),
         title = {
             //No title
         },
