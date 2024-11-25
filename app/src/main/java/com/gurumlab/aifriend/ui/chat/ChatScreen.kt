@@ -133,8 +133,12 @@ fun ChatContent(
     val currentKeyboardHeight =
         WindowInsets.ime.asPaddingValues().calculateBottomPadding().value
 
-    LaunchedEffect(currentKeyboardHeight, chatMessages.itemCount) {
-        goToBottom()
+    val lastMessage = chatMessages.itemSnapshotList.items.lastOrNull()
+
+    LaunchedEffect(currentKeyboardHeight, lastMessage) {
+        if (chatMessages.itemCount > 0) {
+            goToBottom()
+        }
     }
 
     Box(modifier = modifier) {
