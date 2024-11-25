@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -88,24 +89,26 @@ fun ApiKeyDialog(
                 ) {
                     TextButton(
                         onClick = { onDismissRequest() },
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier.padding(2.dp)
                     ) {
                         CustomText(
                             value = stringResource(R.string.cancel),
                             fontStyle = MaterialTheme.typography.bodyLarge,
-                            color = Color.Black,
-                            textAlign = TextAlign.Unspecified
+                            color = Color.Red,
+                            textAlign = TextAlign.Unspecified,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                     TextButton(
                         onClick = { onConfirmation(apikey) },
-                        modifier = Modifier.padding(8.dp)
+                        modifier = Modifier.padding(2.dp)
                     ) {
                         CustomText(
                             value = stringResource(R.string.confirm),
                             fontStyle = MaterialTheme.typography.bodyLarge,
                             color = Color.Black,
-                            textAlign = TextAlign.Unspecified
+                            textAlign = TextAlign.Unspecified,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
