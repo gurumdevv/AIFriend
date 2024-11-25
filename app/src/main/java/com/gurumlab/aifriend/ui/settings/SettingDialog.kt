@@ -1,5 +1,6 @@
 package com.gurumlab.aifriend.ui.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.gurumlab.aifriend.R
 import com.gurumlab.aifriend.ui.theme.primaryLight
+import com.gurumlab.aifriend.ui.theme.surfaceVariantLightMediumContrast
 import com.gurumlab.aifriend.ui.utils.CustomComposable.CustomText
 
 @Composable
@@ -59,6 +61,7 @@ fun ApiKeyDialog(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(surfaceVariantLightMediumContrast)
                     .padding(14.dp),
                 verticalArrangement = Arrangement.Center
             ) {
