@@ -2,8 +2,6 @@ package com.gurumlab.aifriend.ui.chat
 
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -17,7 +15,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Icon
@@ -46,8 +43,6 @@ import com.gurumlab.aifriend.ui.utils.CustomShape.CustomRectangle
 import com.gurumlab.aifriend.ui.utils.CustomShape.CustomTriangle
 import com.gurumlab.aifriend.ui.theme.bubble_incoming
 import com.gurumlab.aifriend.ui.theme.bubble_outgoing
-import com.gurumlab.aifriend.ui.theme.edit_text_background
-import com.gurumlab.aifriend.ui.theme.primaryLight
 
 @Composable
 fun BotMessage(
@@ -194,34 +189,6 @@ fun BubbleOutgoing(modifier: Modifier) {
 }
 
 @Composable
-fun CustomEditTextBackground(
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .background(
-                color = edit_text_background,
-                shape = RoundedCornerShape(
-                    topStart = 45.dp,
-                    topEnd = 45.dp,
-                    bottomEnd = 45.dp,
-                    bottomStart = 45.dp
-                )
-            )
-            .border(
-                width = 1.dp,
-                color = primaryLight,
-                shape = RoundedCornerShape(
-                    topStart = 45.dp,
-                    topEnd = 45.dp,
-                    bottomEnd = 45.dp,
-                    bottomStart = 45.dp
-                )
-            )
-    )
-}
-
-@Composable
 fun JumpToBottom(
     enabled: Boolean,
     onClicked: () -> Unit,
@@ -231,21 +198,22 @@ fun JumpToBottom(
         if (enabled) Visibility.VISIBLE else Visibility.GONE,
         label = stringResource(R.string.jump_to_bottom_label)
     )
-    val bottomOffset by transition.animateDp(label = stringResource(R.string.jump_to_bottom_label)) {
-        if (it == Visibility.GONE) {
-            (-32).dp
-        } else {
-            32.dp
+
+    val bottomOffset by transition.animateDp(label = stringResource(R.string.jump_to_bottom_label)) { visibility ->
+        when (visibility) {
+            Visibility.VISIBLE -> 16.dp
+            Visibility.GONE -> 0.dp
         }
     }
-    if (bottomOffset > 0.dp) {
+
+    if (bottomOffset > 6.dp) {
         SmallFloatingActionButton(
             onClick = onClicked,
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.primary,
             modifier = modifier
-                .offset(y = -bottomOffset)
                 .height(24.dp)
+                .offset(y = -bottomOffset)
         ) {
             Icon(
                 imageVector = Icons.Filled.ArrowDropDown,

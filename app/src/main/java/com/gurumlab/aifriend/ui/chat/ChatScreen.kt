@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -40,9 +42,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -56,7 +56,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -81,17 +80,8 @@ import kotlinx.coroutines.launch
 fun ChatScreen(
     onNavUp: () -> Unit,
 ) {
-    val topBarState = rememberTopAppBarState()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
-
     Scaffold(
-        topBar = {
-            ChatAppBar(
-                scrollBehavior = scrollBehavior,
-                onNavIconPressed = onNavUp
-            )
-        },
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+        topBar = { ChatAppBar(onNavIconPressed = onNavUp) },
     ) { innerPadding ->
         ChatContent(
             modifier = Modifier
@@ -102,6 +92,7 @@ fun ChatScreen(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ChatContent(
     modifier: Modifier = Modifier,
@@ -133,15 +124,14 @@ fun ChatContent(
         }
     }
 
+    val isImeVisible = WindowInsets.isImeVisible
     val currentKeyboardHeight =
         WindowInsets.ime.asPaddingValues().calculateBottomPadding().value
 
     val lastMessage = chatMessages.itemSnapshotList.items.lastOrNull()
 
     LaunchedEffect(currentKeyboardHeight, lastMessage) {
-        if (chatMessages.itemCount > 0) {
-            goToBottom()
-        }
+        goToBottom()
     }
 
     Box(modifier = modifier) {
@@ -173,7 +163,7 @@ fun ChatContent(
         }
 
         JumpToBottom(
-            enabled = jumpToBottomButtonEnabled,
+            enabled = jumpToBottomButtonEnabled && !isImeVisible,
             onClicked = {
                 scope.launch {
                     goToBottom()
@@ -182,7 +172,7 @@ fun ChatContent(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = with(LocalDensity.current) {
-                    inputFieldHeight.toDp() + 16.dp
+                    inputFieldHeight.toDp()
                 })
         )
     }
