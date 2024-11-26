@@ -1,5 +1,12 @@
 package com.gurumlab.aifriend
 
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.Ease
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
@@ -39,8 +46,26 @@ fun AIFriendNavHost(
 
         composable(
             route = AIFriendScreen.CHAT.name,
-            enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
+            enterTransition = {
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 300, easing = LinearEasing
+                    )
+                ) + slideIntoContainer(
+                    animationSpec = tween(durationMillis = 300, easing = Ease),
+                    towards = AnimatedContentTransitionScope.SlideDirection.Up
+                )
+            },
+            exitTransition = {
+                fadeOut(
+                    animationSpec = tween(
+                        durationMillis = 300, easing = EaseOut
+                    )
+                ) + slideOutOfContainer(
+                    animationSpec = tween(durationMillis = 300, easing = EaseOut),
+                    towards = AnimatedContentTransitionScope.SlideDirection.Down
+                )
+            }
         ) {
             ChatRoute(
                 onNavUp = { navController.navigateUp() }
@@ -49,8 +74,26 @@ fun AIFriendNavHost(
 
         composable(
             route = AIFriendScreen.VIDEO_CALL.name,
-            enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
+            enterTransition = {
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 300, easing = LinearEasing
+                    )
+                ) + slideIntoContainer(
+                    animationSpec = tween(durationMillis = 300, easing = Ease),
+                    towards = AnimatedContentTransitionScope.SlideDirection.Up
+                )
+            },
+            exitTransition = {
+                fadeOut(
+                    animationSpec = tween(
+                        durationMillis = 300, easing = EaseOut
+                    )
+                ) + slideOutOfContainer(
+                    animationSpec = tween(durationMillis = 300, easing = EaseOut),
+                    towards = AnimatedContentTransitionScope.SlideDirection.Down
+                )
+            }
         ) {
             VideoChatRoute(
                 onNavUp = { navController.navigateUp() }
