@@ -1,6 +1,10 @@
 package com.gurumlab.aifriend.ui.chat
 
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Ease
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -69,6 +73,7 @@ import com.gurumlab.aifriend.data.model.ChatMessage
 import com.gurumlab.aifriend.ui.theme.edit_text_background
 import com.gurumlab.aifriend.ui.theme.primaryLight
 import com.gurumlab.aifriend.util.Role
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,7 +81,6 @@ import kotlinx.coroutines.launch
 fun ChatScreen(
     onNavUp: () -> Unit,
 ) {
-    val scrollState = rememberLazyListState()
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
 
@@ -90,7 +94,6 @@ fun ChatScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
     ) { innerPadding ->
         ChatContent(
-            scrollState = scrollState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -101,7 +104,6 @@ fun ChatScreen(
 
 @Composable
 fun ChatContent(
-    scrollState: LazyListState,
     modifier: Modifier = Modifier,
     viewModel: ChatViewModel = hiltViewModel<ChatViewModel>()
 ) {
@@ -111,6 +113,7 @@ fun ChatContent(
     var inputFieldHeight by remember { mutableIntStateOf(0) }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val scrollState = rememberLazyListState()
 
     val jumpToBottomButtonEnabled by remember {
         derivedStateOf {
@@ -192,22 +195,33 @@ fun Messages(
     context: Context,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-    ) {
-        LazyColumn(
-            state = scrollState,
-            modifier = Modifier.fillMaxSize()
+    var isShowList by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        delay(180)
+        isShowList = true
+    }
+
+    Box(modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            modifier = Modifier.fillMaxSize(),
+            visible = isShowList,
+            enter = fadeIn(animationSpec = tween(durationMillis = 100, easing = Ease))
         ) {
-            items(
-                items = messages.itemSnapshotList.items,
-                key = { message -> message.id }) { message ->
-                if (message.role == Role.USER) {
-                    UserMessage(message = message.content)
-                } else {
-                    BotMessage(message = message.content.ifEmpty { context.getString(R.string.fail_response) })
+            LazyColumn(
+                state = scrollState,
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(
+                    items = messages.itemSnapshotList.items,
+                    key = { message -> message.id }) { message ->
+                    if (message.role == Role.USER) {
+                        UserMessage(message = message.content)
+                    } else {
+                        BotMessage(message = message.content.ifEmpty { context.getString(R.string.fail_response) })
+                    }
+                    Spacer(modifier = Modifier.height(14.dp))
                 }
-                Spacer(modifier = Modifier.height(14.dp))
             }
         }
     }
