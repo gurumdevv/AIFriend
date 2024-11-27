@@ -67,6 +67,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.gurumlab.aifriend.R
 import com.gurumlab.aifriend.data.model.ChatMessage
 import com.gurumlab.aifriend.ui.theme.edit_text_background
@@ -106,33 +107,33 @@ fun ChatContent(
     val context = LocalContext.current
     val scrollState = rememberLazyListState()
 
-    val jumpToBottomButtonEnabled by remember {
-        derivedStateOf {
-            val visibleItems = scrollState.layoutInfo.visibleItemsInfo
-            if (visibleItems.isNotEmpty()) {
-                val lastVisibleItem = visibleItems.last()
-                lastVisibleItem.index < chatMessages.itemCount - 1
-            } else {
-                false
-            }
-        }
-    }
+//    val jumpToBottomButtonEnabled by remember {
+//        derivedStateOf {
+//            val visibleItems = scrollState.layoutInfo.visibleItemsInfo
+//            if (visibleItems.isNotEmpty()) {
+//                val lastVisibleItem = visibleItems.last()
+//                lastVisibleItem.index < chatMessages.itemCount - 1
+//            } else {
+//                false
+//            }
+//        }
+//    }
+//
+//    val goToBottom: suspend () -> Unit = {
+//        if (chatMessages.itemCount > 0) {
+//            scrollState.scrollToItem(chatMessages.itemCount - 1)
+//        }
+//    }
 
-    val goToBottom: suspend () -> Unit = {
-        if (chatMessages.itemCount > 0) {
-            scrollState.scrollToItem(chatMessages.itemCount - 1)
-        }
-    }
-
-    val isImeVisible = WindowInsets.isImeVisible
-    val currentKeyboardHeight =
-        WindowInsets.ime.asPaddingValues().calculateBottomPadding().value
-
-    val lastMessage = chatMessages.itemSnapshotList.items.lastOrNull()
-
-    LaunchedEffect(currentKeyboardHeight, lastMessage) {
-        goToBottom()
-    }
+//    val isImeVisible = WindowInsets.isImeVisible
+//    val currentKeyboardHeight =
+//        WindowInsets.ime.asPaddingValues().calculateBottomPadding().value
+//
+//    val lastMessage = chatMessages.itemSnapshotList.items.lastOrNull()
+//
+//    LaunchedEffect(currentKeyboardHeight, lastMessage) {
+//        goToBottom()
+//    }
 
     Box(modifier = modifier) {
         Column(
@@ -163,10 +164,11 @@ fun ChatContent(
         }
 
         JumpToBottom(
-            enabled = jumpToBottomButtonEnabled && !isImeVisible,
+            enabled = false,
+//            enabled = jumpToBottomButtonEnabled && !isImeVisible,
             onClicked = {
                 scope.launch {
-                    goToBottom()
+//                    goToBottom()
                 }
             },
             modifier = Modifier
@@ -200,11 +202,14 @@ fun Messages(
         ) {
             LazyColumn(
                 state = scrollState,
+                reverseLayout = true,
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(
-                    items = messages.itemSnapshotList.items,
-                    key = { message -> message.id }) { message ->
+                    count = messages.itemCount,
+                    key = messages.itemKey { it.id },
+                ) { index ->
+                    val message = messages[index]!!
                     if (message.role == Role.USER) {
                         UserMessage(message = message.content)
                     } else {

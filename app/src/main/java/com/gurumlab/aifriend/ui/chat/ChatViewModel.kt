@@ -3,13 +3,11 @@ package com.gurumlab.aifriend.ui.chat
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.gurumlab.aifriend.data.model.ChatMessage
 import com.gurumlab.aifriend.data.repository.ChatRepository
 import com.gurumlab.aifriend.util.Role
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -21,8 +19,7 @@ class ChatViewModel @Inject constructor(
     private val repository: ChatRepository
 ) : ViewModel() {
 
-    val chatMessages: Flow<PagingData<ChatMessage>> =
-        repository.getAllMessages().cachedIn(viewModelScope)
+    val chatMessages = repository.getPagedMessages().cachedIn(viewModelScope)
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()

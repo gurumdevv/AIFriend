@@ -7,6 +7,7 @@ import com.gurumlab.aifriend.data.model.ChatMessage
 import com.gurumlab.aifriend.data.model.ChatRequest
 import com.gurumlab.aifriend.data.model.ChatResponse
 import com.gurumlab.aifriend.data.source.local.ChatDao
+import com.gurumlab.aifriend.data.source.local.ChatPagingSource
 import com.gurumlab.aifriend.data.source.remote.ChatApiClient
 import com.gurumlab.aifriend.data.source.remote.onError
 import com.gurumlab.aifriend.data.source.remote.onException
@@ -21,7 +22,8 @@ import javax.inject.Inject
 
 class ChatRepository @Inject constructor(
     private val apiClient: ChatApiClient,
-    private val chatDao: ChatDao
+    private val chatDao: ChatDao,
+    private val pagingSource: ChatPagingSource
 ) {
 
     fun getResponse(
@@ -51,10 +53,10 @@ class ChatRepository @Inject constructor(
         chatDao.insertMessage(message)
     }
 
-    fun getAllMessages(): Flow<PagingData<ChatMessage>> {
+    fun getPagedMessages(): Flow<PagingData<ChatMessage>> {
         return Pager(
-            config = PagingConfig(pageSize = 20, enablePlaceholders = false, initialLoadSize = 30),
-            pagingSourceFactory = { chatDao.getAllMessages() }
+            config = PagingConfig(pageSize = 20, enablePlaceholders = false, initialLoadSize = 10),
+            pagingSourceFactory = { pagingSource }
         ).flow
     }
 

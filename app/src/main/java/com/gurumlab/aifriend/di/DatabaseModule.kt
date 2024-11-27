@@ -25,6 +25,7 @@ object DatabaseModule {
         ).build()
     }
 
+    @Singleton
     @Provides
     fun provideChatDao(appDatabase: AppDatabase): ChatDao {
         return appDatabase.chatDao()
