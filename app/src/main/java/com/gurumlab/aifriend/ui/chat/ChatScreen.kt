@@ -207,7 +207,7 @@ fun Messages(
             ) {
                 items(
                     count = messages.itemCount,
-                    key = messages.itemKey { it.id },
+                    key = messages.itemKey { it.id }
                 ) { index ->
                     val message = messages[index]!!
                     if (message.role == Role.USER) {

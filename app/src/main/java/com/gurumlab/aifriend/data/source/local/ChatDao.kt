@@ -12,11 +12,8 @@ interface ChatDao {
     @Insert
     suspend fun insertMessage(message: ChatMessage)
 
-    @Query("SELECT * FROM ChatMessage ORDER BY id ASC")
-    fun getAllMessages(): PagingSource<Int, ChatMessage>
-
-    @Query("SELECT * FROM ChatMessage ORDER BY id DESC LIMIT :loadSize OFFSET :index * :loadSize")
-    suspend fun getPartialChatMessages(index: Int, loadSize: Int): List<ChatMessage>
+    @Query("SELECT * FROM ChatMessage ORDER BY id DESC")
+    fun getPagedChatMessages(): PagingSource<Int, ChatMessage>
 
     @Query("SELECT * FROM ChatMessage ORDER BY id DESC LIMIT 4")
     suspend fun getFourMessages(): List<ChatMessage>
