@@ -1,17 +1,14 @@
 package com.gurumlab.aifriend.ui.chat
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Ease
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,6 +19,7 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -45,22 +43,17 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -76,7 +69,6 @@ import com.gurumlab.aifriend.ui.theme.edit_text_background
 import com.gurumlab.aifriend.ui.theme.primaryLight
 import com.gurumlab.aifriend.util.Role
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,7 +87,6 @@ fun ChatScreen(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ChatContent(
     modifier: Modifier = Modifier,
@@ -105,79 +96,48 @@ fun ChatContent(
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
     var inputFieldHeight by remember { mutableIntStateOf(0) }
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val listState = rememberLazyListState()
 
-//    val jumpToBottomButtonEnabled by remember {
-//        derivedStateOf {
-//            val visibleItems = scrollState.layoutInfo.visibleItemsInfo
-//            if (visibleItems.isNotEmpty()) {
-//                val lastVisibleItem = visibleItems.last()
-//                lastVisibleItem.index < chatMessages.itemCount - 1
-//            } else {
-//                false
-//            }
-//        }
-//    }
-//
-//    val goToBottom: suspend () -> Unit = {
-//        if (chatMessages.itemCount > 0) {
-//            scrollState.scrollToItem(chatMessages.itemCount - 1)
-//        }
-//    }
-
-//    val isImeVisible = WindowInsets.isImeVisible
-//    val currentKeyboardHeight =
-//        WindowInsets.ime.asPaddingValues().calculateBottomPadding().value
-//
-//    val lastMessage = chatMessages.itemSnapshotList.items.lastOrNull()
-//
-//    LaunchedEffect(currentKeyboardHeight, lastMessage) {
-//        goToBottom()
-//    }
-
-    Box(modifier = modifier) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Messages(
-                messages = chatMessages,
-                listState = listState,
-                context = context,
-                modifier = Modifier.weight(1f)
-            )
-            ChatInput(
-                isLoading = isLoading,
-                onMessageSent = { content ->
-                    viewModel.getResponse(
-                        content = content,
-                        loadingMessage = context.getString(R.string.loading)
-                    )
-                },
-                onSizeChanged = { height ->
-                    inputFieldHeight = height
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .consumeWindowInsets(WindowInsets.navigationBars.asPaddingValues())
-                    .imePadding()
-            )
+    val goToBottom: suspend () -> Unit = {
+        if (chatMessages.itemCount > 0) {
+            listState.scrollToItem(0)
         }
+    }
 
-        JumpToBottom(
-            enabled = false,
-//            enabled = jumpToBottomButtonEnabled && !isImeVisible,
-            onClicked = {
-                scope.launch {
-//                    goToBottom()
-                }
+    val currentKeyboardHeight =
+        WindowInsets.ime.asPaddingValues().calculateBottomPadding().value
+
+    val lastMessage = chatMessages.itemSnapshotList.items.lastOrNull()
+
+    LaunchedEffect(currentKeyboardHeight, lastMessage) {
+        goToBottom()
+    }
+
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
+        Messages(
+            messages = chatMessages,
+            listState = listState,
+            context = context,
+            modifier = Modifier.weight(1f)
+        )
+        ChatInput(
+            isLoading = isLoading,
+            onMessageSent = { content ->
+                viewModel.getResponse(
+                    content = content,
+                    loadingMessage = context.getString(R.string.loading)
+                )
+            },
+            onSizeChanged = { height ->
+                inputFieldHeight = height
             },
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = with(LocalDensity.current) {
-                    inputFieldHeight.toDp()
-                })
+                .fillMaxWidth()
+                .consumeWindowInsets(WindowInsets.navigationBars.asPaddingValues())
+                .imePadding()
         )
     }
 }
@@ -189,31 +149,6 @@ fun Messages(
     context: Context,
     modifier: Modifier = Modifier
 ) {
-    var lazyColumHeightPx by remember { mutableFloatStateOf(0f) }
-    val layoutInfo = remember { derivedStateOf { listState.layoutInfo } }
-    val totalItemHeight = layoutInfo.value.visibleItemsInfo.sumOf { it.size }
-
-    //TODO: 키보드가 올라온 경우 대응 필요
-//    LaunchedEffect(lazyColumHeightPx) {
-//        Log.d("ChatScreen", "lazyColumHeightPx: $lazyColumHeightPx")
-//    }
-//    LaunchedEffect(totalItemHeight) {
-//        Log.d("ChatScreen", "totalItemHeight: $totalItemHeight")
-//    }
-
-    val paddingBottomPx = if (totalItemHeight < lazyColumHeightPx) {
-        lazyColumHeightPx - totalItemHeight
-    } else {
-        0f
-    }
-    val paddingBottomDp = with(LocalDensity.current) { paddingBottomPx.toDp() }
-
-//    LaunchedEffect(paddingBottomDp) {
-//        Log.d("ChatScreen", "paddingBottomDp: $paddingBottomDp")
-//    }
-
-    val animatedPadding by animateDpAsState(targetValue = paddingBottomDp, label = "")
-
     var isShowList by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -231,11 +166,8 @@ fun Messages(
                 state = listState,
                 reverseLayout = true,
                 modifier = Modifier
-                    .fillMaxSize()
-                    .onGloballyPositioned {
-                        lazyColumHeightPx = it.size.height.toFloat()
-                    },
-                contentPadding = PaddingValues(bottom = animatedPadding)
+                    .fillMaxSize(),
+                contentPadding = PaddingValues(bottom = 16.dp)
             ) {
                 items(
                     count = messages.itemCount,
