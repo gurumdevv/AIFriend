@@ -31,6 +31,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -40,7 +41,6 @@ import com.gurumlab.aifriend.util.MediaHandler
 
 @Composable
 fun VideoCallScreen(
-    viewModel: VideoChatViewModel,
     onNavUp: () -> Unit
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -57,18 +57,17 @@ fun VideoCallScreen(
     ) { innerPadding ->
         Box(modifier = Modifier.fillMaxSize()) {
             CustomImage(
-                modifier = Modifier.fillMaxSize(),
                 imageId = R.drawable.bg_room,
-                contentDescription = stringResource(R.string.background_image)
+                contentDescription = stringResource(R.string.background_image),
+                modifier = Modifier.fillMaxSize()
             )
 
             VideoCallContent(
+                snackbarHostState = snackbarHostState,
+                mediaHandler = MediaHandler(),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
-                snackbarHostState = snackbarHostState,
-                viewModel = viewModel,
-                mediaHandler = MediaHandler()
+                    .padding(innerPadding)
             )
         }
 
@@ -78,26 +77,26 @@ fun VideoCallScreen(
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun VideoCallContent(
-    modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState,
-    viewModel: VideoChatViewModel,
-    mediaHandler: MediaHandler
+    mediaHandler: MediaHandler,
+    modifier: Modifier = Modifier,
+    viewModel: VideoChatViewModel = hiltViewModel<VideoChatViewModel>()
 ) {
     val recordPermissionState =
         rememberPermissionState(Manifest.permission.RECORD_AUDIO)
-    var recordingState by remember { mutableStateOf(false) }
+    var isRecording by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val isLoading by viewModel.isLoading.collectAsState(false)
     val character by viewModel.characterEmotion.collectAsState()
 
     val onClick = {
-        if (!recordingState) {
+        if (!isRecording) {
             mediaHandler.startRecording(context, viewModel) { state ->
-                recordingState = state
+                isRecording = state
             }
         } else {
             mediaHandler.stopRecording(viewModel) { state ->
-                recordingState = state
+                isRecording = state
             }
         }
     }
@@ -112,26 +111,26 @@ fun VideoCallContent(
         modifier = modifier.fillMaxSize(),
     ) {
         CustomImage(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.Center),
             imageId = character,
             contentDescription = stringResource(R.string.character),
-            contentScale = ContentScale.FillWidth
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center)
         )
 
         if (isLoading) {
             CustomImage(
+                imageId = R.drawable.img_waiting,
+                contentDescription = stringResource(R.string.waiting_response),
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(start = 75.dp, bottom = 200.dp),
-                imageId = R.drawable.img_waiting,
-                contentDescription = stringResource(R.string.waiting_response)
+                    .padding(start = 75.dp, bottom = 200.dp)
             )
         }
 
         if (recordPermissionState.status.isGranted) {
-            if (recordingState) {
+            if (isRecording) {
                 LottieAnimationLoader(
                     Modifier
                         .size(150.dp)
@@ -141,12 +140,12 @@ fun VideoCallContent(
             }
 
             IconButton(
+                enabled = !isLoading,
+                onClick = onClick,
                 modifier = Modifier
                     .size(100.dp)
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = 10.dp),
-                enabled = !isLoading,
-                onClick = { onClick() }
+                    .padding(bottom = 10.dp)
             ) {
                 CustomImage(
                     imageId = R.drawable.img_mike,

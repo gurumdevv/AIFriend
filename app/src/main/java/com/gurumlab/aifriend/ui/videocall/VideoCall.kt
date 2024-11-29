@@ -31,8 +31,8 @@ import com.gurumlab.aifriend.ui.utils.CustomComposable.CustomText
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun RequestPermission(
-    modifier: Modifier = Modifier,
-    recordPermissionState: PermissionState
+    recordPermissionState: PermissionState,
+    modifier: Modifier = Modifier
 ) {
     if (!recordPermissionState.status.isGranted) {
         Column(
