@@ -43,6 +43,10 @@ fun AIFriendNavHost(
             )
         }
 
+        val onNavUp: () -> Unit = {
+            navController.navigateUp()
+        }
+
         composable(
             route = AIFriendScreen.CHAT.name,
             enterTransition = {
@@ -66,9 +70,7 @@ fun AIFriendNavHost(
                 )
             }
         ) {
-            ChatRoute(
-                onNavUp = { navController.navigateUp() }
-            )
+            ChatRoute(onNavUp = onNavUp)
         }
 
         composable(
@@ -94,9 +96,7 @@ fun AIFriendNavHost(
                 )
             }
         ) {
-            VideoChatRoute(
-                onNavUp = { navController.navigateUp() }
-            )
+            VideoChatRoute(onNavUp = onNavUp)
         }
 
         composable(
@@ -122,9 +122,7 @@ fun AIFriendNavHost(
                 )
             }
         ) {
-            SettingsRoute(
-                onNavUp = { navController.navigateUp() }
-            )
+            SettingsRoute(onNavUp = onNavUp)
         }
     }
 }
