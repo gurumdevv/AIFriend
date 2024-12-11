@@ -11,6 +11,14 @@
 ‣ **비디오 채팅**<br>
 여러분의 이야기를 듣고 답변을 생성합니다. 이후, 답변 내용을 바탕으로 감정을 분석해 캐릭터가 해당 표정을 지으며 음성으로 답변합니다.<br>
 
+## Documents
+**프로젝트를 진행하면서 고민하고 공부했던 내용을 정리했습니다.** <br>
+
+- Compose에서 Paging 3 라이브러리 사용하기: [Link](https://github.com/gurumdevv/AIFriend/wiki/Compose%EC%97%90%EC%84%9C-Paging-3-%EB%9D%BC%EC%9D%B4%EB%B8%8C%EB%9F%AC%EB%A6%AC-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0)
+- MediaRecorder with Compose: [Link](https://github.com/gurumdevv/AIFriend/wiki/MediaRecorder-with-Compose)
+- Retrofit을 사용해서 File 통신하기(MultipartBody)
+: [Link](https://github.com/gurumdevv/AIFriend/wiki/Retrofit%EC%9D%84-%EC%82%AC%EC%9A%A9%ED%95%B4%EC%84%9C-File-%ED%86%B5%EC%8B%A0%ED%95%98%EA%B8%B0(MultipartBody))
+
 ## Screenshot
 <p align="center">
 <img src="https://github.com/gurumdevv/AIFriend/assets/129643788/3e44fe85-03e2-4fa5-b6c5-7bbca9cedfd2" width="23%" height="30%">
@@ -33,7 +41,7 @@
 | **Android Jetpack** | Compose, ViewModel, Navigation, Room, Paging 3 |
 | **Dependency Injection** | Hilt |
 | **Networking** | Retrofit2, OkHttp3 |
-| **Asynchronous** | Coroutine, Flow, SharedFlow, StateFlow |
+| **Asynchronous** | Coroutine, SharedFlow, StateFlow |
 | **Local DB** | Room, DataStore |
 | **Media** | MediaRecorder, MediaPlayer |
 
@@ -42,8 +50,6 @@
 2. 앱 홈 화면의 오른쪽 상단 설정 버튼을 터치 > API Key 항목의 편집 버튼을 터치 > Dialog에서 API Key를 입력한 후 확인 버튼을 터치 순으로 진행합니다.<br>
 
 ## How to Download
-아래 링크에서 apk 파일을 다운받으실 수 있습니다.<br><br>
 <a href="https://drive.google.com/drive/folders/1Z-EJgq0-X-6tzTsR5u8oAXfQIQib6IrW?usp=sharing">
-    <img src="https://github.com/gurumdevv/VocaRoutine/assets/129643788/bb151951-8222-4d6d-b729-9cbc959707f5" alt="어원으로 암기" width="45" height="45">
-</a> 
-&nbsp;&nbsp;← 구글 드라이브 아이콘을 클릭해주세요.
+    <img src="https://github.com/user-attachments/assets/db3d20c4-f3ca-4265-8328-0cdcd7f787b0" alt="download_on_gdrive" width="213" height="83">
+</a>
