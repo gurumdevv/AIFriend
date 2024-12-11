@@ -39,11 +39,11 @@ fun HomeBackground() {
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.weight(0.5f))
             GradientBox(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .weight(0.5f)
             )
         }
     }

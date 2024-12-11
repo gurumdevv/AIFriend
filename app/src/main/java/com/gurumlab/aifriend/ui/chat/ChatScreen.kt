@@ -40,7 +40,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -70,7 +69,6 @@ import com.gurumlab.aifriend.ui.theme.primaryLight
 import com.gurumlab.aifriend.util.Role
 import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
     onNavUp: () -> Unit,
@@ -255,14 +253,12 @@ fun ChatInput(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatAppBar(
-    scrollBehavior: TopAppBarScrollBehavior? = null,
-    onNavIconPressed: () -> Unit = {}
+    onNavIconPressed: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         title = {
             //No title
         },
-        scrollBehavior = scrollBehavior,
         navigationIcon = {
             IconButton(onClick = onNavIconPressed) {
                 Icon(
