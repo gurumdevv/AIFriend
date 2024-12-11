@@ -28,4 +28,6 @@
     <string name="set_api_key">API Key 설정</string>
     <string name="insert_api_key">API Key 입력</string>
     <string name="api_key">API Key</string>
+    <string name="snackbar_icon">스낵바 아이콘</string>
+    <string name="no_gpt_key_set">GPT API 키 설정 후 이용해 주세요.\n설정 > API Key 편집</string>
 </resources>

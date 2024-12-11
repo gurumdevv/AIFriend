@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -37,6 +38,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -46,6 +49,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -67,7 +72,9 @@ import com.gurumlab.aifriend.data.model.ChatMessage
 import com.gurumlab.aifriend.ui.theme.edit_text_background
 import com.gurumlab.aifriend.ui.theme.primaryLight
 import com.gurumlab.aifriend.util.Role
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatScreen(
@@ -90,12 +97,23 @@ fun ChatContent(
     modifier: Modifier = Modifier,
     viewModel: ChatViewModel = hiltViewModel<ChatViewModel>()
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.checkAlreadyGPTKeySet()
+    }
+
     val chatMessages = viewModel.chatMessages.collectAsLazyPagingItems()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val isGPTKeySet by viewModel.isGPTKeySet.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    var inputFieldHeight by remember { mutableIntStateOf(0) }
+    var inputFieldHeightPixel by remember { mutableIntStateOf(0) }
     val context = LocalContext.current
+    val density = LocalDensity.current
     val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val snackBarYOffSet = with(density) {
+        (inputFieldHeightPixel).toDp()
+    } + 10.dp
 
     val goToBottom: suspend () -> Unit = {
         if (chatMessages.itemCount > 0) {
@@ -112,28 +130,44 @@ fun ChatContent(
         goToBottom()
     }
 
-    Column(
-        modifier = modifier.fillMaxSize()
-    ) {
-        Messages(
-            messages = chatMessages,
-            listState = listState,
-            context = context,
-            modifier = Modifier.weight(1f)
-        )
-        ChatInput(
-            isLoading = isLoading,
-            onMessageSent = { content ->
-                viewModel.getResponse(
-                    content = content,
-                    loadingMessage = context.getString(R.string.loading)
-                )
-            },
-            onSizeChanged = { height ->
-                inputFieldHeight = height
-            },
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Messages(
+                messages = chatMessages,
+                listState = listState,
+                context = context,
+                modifier = Modifier.weight(1f)
+            )
+            ChatInput(
+                isLoading = isLoading,
+                isGPTKeySet = isGPTKeySet,
+                snackbarHostState = snackbarHostState,
+                scope = scope,
+                context = context,
+                onMessageSent = { content ->
+                    viewModel.getResponse(
+                        content = content,
+                        loadingMessage = context.getString(R.string.loading)
+                    )
+                },
+                onSizeChanged = { height ->
+                    inputFieldHeightPixel = height
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .consumeWindowInsets(WindowInsets.navigationBars.asPaddingValues())
+                    .imePadding()
+            )
+        }
+
+        ErrorSnackBar(
+            snackbarHostState = snackbarHostState,
             modifier = Modifier
-                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .offset(y = -snackBarYOffSet)
+                .padding(horizontal = 15.dp)
                 .consumeWindowInsets(WindowInsets.navigationBars.asPaddingValues())
                 .imePadding()
         )
@@ -187,6 +221,10 @@ fun Messages(
 @Composable
 fun ChatInput(
     isLoading: Boolean,
+    isGPTKeySet: Boolean,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope,
+    context: Context,
     onMessageSent: (String) -> Unit,
     onSizeChanged: (Int) -> Unit,
     modifier: Modifier = Modifier
@@ -201,10 +239,23 @@ fun ChatInput(
         cursorColor = primaryLight
     )
 
+    val showSnackbar: () -> Unit = {
+        scope.launch {
+            snackbarHostState.showSnackbar(
+                message = context.getString(R.string.no_gpt_key_set),
+                duration = SnackbarDuration.Short
+            )
+        }
+    }
+
     val onClick = {
-        if (textState.isNotBlank()) {
+        if (!isGPTKeySet) {
+            showSnackbar()
+        } else if (textState.isNotBlank()) {
             onMessageSent(textState)
             textState = ""
+        } else {
+            //Nothing
         }
     }
 

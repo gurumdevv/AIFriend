@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,6 +24,9 @@ class ChatViewModel @Inject constructor(
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
+
+    private val _isGPTKeySet = MutableStateFlow(false)
+    val isGPTKeySet = _isGPTKeySet.asStateFlow()
 
     fun getResponse(content: String, loadingMessage: String) {
         viewModelScope.launch {
@@ -60,5 +64,12 @@ class ChatViewModel @Inject constructor(
 
     private suspend fun getLastMessage(): List<ChatMessage> {
         return repository.getLastFourMessages().firstOrNull() ?: emptyList()
+    }
+
+    fun checkAlreadyGPTKeySet() {
+        viewModelScope.launch {
+            val currentGPTKey = repository.getGptApiKey().single()
+            _isGPTKeySet.value = currentGPTKey.isNotBlank()
+        }
     }
 }

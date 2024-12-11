@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import com.gurumlab.aifriend.data.model.ChatMessage
 import com.gurumlab.aifriend.data.model.ChatRequest
 import com.gurumlab.aifriend.data.model.ChatResponse
+import com.gurumlab.aifriend.data.source.local.AppDataStore
 import com.gurumlab.aifriend.data.source.local.ChatDao
 import com.gurumlab.aifriend.data.source.remote.ChatApiClient
 import com.gurumlab.aifriend.data.source.remote.onError
@@ -22,6 +23,7 @@ import javax.inject.Inject
 class ChatRepository @Inject constructor(
     private val apiClient: ChatApiClient,
     private val chatDao: ChatDao,
+    private val dataStore: AppDataStore
 ) {
 
     fun getResponse(
@@ -61,5 +63,9 @@ class ChatRepository @Inject constructor(
     suspend fun deleteLoadingMessage() {
         val loadingMessage = chatDao.getLastMessage()
         chatDao.deleteById(loadingMessage.id)
+    }
+
+    fun getGptApiKey(): Flow<String> {
+        return dataStore.getGptApiKey()
     }
 }
