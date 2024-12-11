@@ -5,6 +5,7 @@ import com.gurumlab.aifriend.data.model.ChatRequest
 import com.gurumlab.aifriend.data.model.ChatResponse
 import com.gurumlab.aifriend.data.model.SpeechRequest
 import com.gurumlab.aifriend.data.model.TranscriptionResponse
+import com.gurumlab.aifriend.data.source.local.AppDataStore
 import com.gurumlab.aifriend.data.source.local.ChatDao
 import com.gurumlab.aifriend.data.source.remote.ChatApiClient
 import com.gurumlab.aifriend.data.source.remote.SpeechApiClient
@@ -32,7 +33,8 @@ class VideoChatRepository @Inject constructor(
     private val chatApiClient: ChatApiClient,
     private val transcriptionApiClient: TranscriptionApiClient,
     private val speechApiClient: SpeechApiClient,
-    private val chatDao: ChatDao
+    private val chatDao: ChatDao,
+    private val dataStore: AppDataStore
 ) {
 
     fun getTranscription(
@@ -111,6 +113,10 @@ class VideoChatRepository @Inject constructor(
 
     suspend fun insertMessage(message: ChatMessage) {
         chatDao.insertMessage(message)
+    }
+
+    fun getGptApiKey(): Flow<String> {
+        return dataStore.getGptApiKey()
     }
 
     companion object {

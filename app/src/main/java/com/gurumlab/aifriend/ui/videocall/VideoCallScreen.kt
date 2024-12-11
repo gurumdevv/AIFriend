@@ -82,15 +82,23 @@ fun VideoCallContent(
     modifier: Modifier = Modifier,
     viewModel: VideoChatViewModel = hiltViewModel<VideoChatViewModel>()
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.checkAlreadyGPTKeySet()
+    }
+
     val recordPermissionState =
         rememberPermissionState(Manifest.permission.RECORD_AUDIO)
     var isRecording by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val isGptKeySet by viewModel.isGPTKeySet.collectAsState(false)
     val isLoading by viewModel.isLoading.collectAsState(false)
     val character by viewModel.characterEmotion.collectAsState()
+    val snackbarMessageRes by viewModel.snackbarMessage.collectAsState(-1)
 
     val onClick = {
-        if (!isRecording) {
+        if (!isGptKeySet) {
+            viewModel.showIsNotGPTKeySetSnackBar()
+        } else if (!isRecording) {
             mediaHandler.startRecording(context, viewModel) { state ->
                 isRecording = state
             }
@@ -101,9 +109,9 @@ fun VideoCallContent(
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.snackbarMessage.collect { message ->
-            snackbarHostState.showSnackbar(context.getString(message))
+    LaunchedEffect(snackbarMessageRes) {
+        if (snackbarMessageRes != -1) {
+            snackbarHostState.showSnackbar(context.getString(snackbarMessageRes))
         }
     }
 

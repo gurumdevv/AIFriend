@@ -10,8 +10,8 @@ import com.gurumlab.aifriend.util.Role
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -68,7 +68,7 @@ class ChatViewModel @Inject constructor(
 
     fun checkAlreadyGPTKeySet() {
         viewModelScope.launch {
-            val currentGPTKey = repository.getGptApiKey().single()
+            val currentGPTKey = repository.getGptApiKey().first()
             _isGPTKeySet.value = currentGPTKey.isNotBlank()
         }
     }

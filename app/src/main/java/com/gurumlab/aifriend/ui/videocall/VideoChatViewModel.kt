@@ -11,10 +11,12 @@ import com.gurumlab.aifriend.util.GPTConstants
 import com.gurumlab.aifriend.util.MediaHandler
 import com.gurumlab.aifriend.util.Role
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.io.File
@@ -34,6 +36,9 @@ class VideoChatViewModel @Inject constructor(
 
     private val _snackbarMessage = MutableSharedFlow<Int>()
     val snackbarMessage = _snackbarMessage.asSharedFlow()
+
+    private val _isGPTKeySet = MutableStateFlow(false)
+    val isGPTKeySet = _isGPTKeySet.asStateFlow()
 
     fun getResponse(file: File) {
         viewModelScope.launch {
@@ -147,6 +152,17 @@ class VideoChatViewModel @Inject constructor(
         }
     }
 
+    fun checkAlreadyGPTKeySet() {
+        viewModelScope.launch {
+            val currentGPTKey = repository.getGptApiKey().first()
+            _isGPTKeySet.value = currentGPTKey.isNotBlank()
+        }
+    }
+
+    fun showIsNotGPTKeySetSnackBar() {
+        setSnackbarMessage(R.string.no_gpt_key_set)
+    }
+
     private fun String.checkAndHandleError(errorMessage: String): Boolean {
         return if (this.isEmpty()) {
             handleError(errorMessage)
@@ -165,7 +181,13 @@ class VideoChatViewModel @Inject constructor(
     fun setSnackbarMessage(messageRes: Int) {
         viewModelScope.launch {
             _snackbarMessage.emit(messageRes)
+            delay(4000L) //SnackbarDuration.Short
+            resetSnackbarMessage()
         }
+    }
+
+    private suspend fun resetSnackbarMessage() {
+        _snackbarMessage.emit(-1)
     }
 
     override fun onCleared() {
